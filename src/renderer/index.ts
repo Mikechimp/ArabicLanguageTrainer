@@ -18,6 +18,8 @@ import { VocabularyView } from './views/vocabulary';
 import { QuizView } from './views/quiz';
 import { ProgressView } from './views/progress';
 import { SettingsView } from './views/settings';
+import { ReadingView } from './views/reading';
+import { AlphabetView } from './views/alphabet';
 
 // ─── Application Bootstrap ──────────────────────────────────────────
 
@@ -35,8 +37,10 @@ class App {
 
   private registerViews(): void {
     this.router.register('dashboard', () => new DashboardView(this.api));
+    this.router.register('alphabet', () => new AlphabetView());
     this.router.register('vocabulary', () => new VocabularyView(this.api));
     this.router.register('quiz', () => new QuizView(this.api));
+    this.router.register('reading', () => new ReadingView(this.api));
     this.router.register('progress', () => new ProgressView(this.api));
     this.router.register('settings', () => new SettingsView(this.api));
   }
