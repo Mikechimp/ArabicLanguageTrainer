@@ -55,32 +55,39 @@ export interface Category {
   icon: string;
 }
 
+function getAPI() {
+  if (!window.electronAPI) {
+    throw new Error('electronAPI not available - preload script may not have loaded');
+  }
+  return window.electronAPI;
+}
+
 export class ApiClient {
   // ── Health ─────────────────────────────────────────────────────
   async getStatus(): Promise<BackendStatus> {
-    return window.electronAPI.getBackendStatus();
+    return getAPI().getBackendStatus();
   }
 
   // ── Vocabulary ─────────────────────────────────────────────────
   async getVocabulary(): Promise<VocabularyItem[]> {
-    return window.electronAPI.apiRequest('/api/vocabulary', 'GET') as Promise<VocabularyItem[]>;
+    return getAPI().apiRequest('/api/vocabulary', 'GET') as Promise<VocabularyItem[]>;
   }
 
   async getVocabularyByCategory(category: string): Promise<VocabularyItem[]> {
-    return window.electronAPI.apiRequest(`/api/vocabulary/${encodeURIComponent(category)}`, 'GET') as Promise<VocabularyItem[]>;
+    return getAPI().apiRequest(`/api/vocabulary/${encodeURIComponent(category)}`, 'GET') as Promise<VocabularyItem[]>;
   }
 
   async getCategories(): Promise<Category[]> {
-    return window.electronAPI.apiRequest('/api/categories', 'GET') as Promise<Category[]>;
+    return getAPI().apiRequest('/api/categories', 'GET') as Promise<Category[]>;
   }
 
   // ── Quiz ───────────────────────────────────────────────────────
   async getQuiz(): Promise<QuizQuestion[]> {
-    return window.electronAPI.apiRequest('/api/quiz', 'GET') as Promise<QuizQuestion[]>;
+    return getAPI().apiRequest('/api/quiz', 'GET') as Promise<QuizQuestion[]>;
   }
 
   async submitAnswer(vocabularyId: string, correct: boolean): Promise<{ success: boolean; streak: number }> {
-    return window.electronAPI.apiRequest('/api/quiz/submit', 'POST', {
+    return getAPI().apiRequest('/api/quiz/submit', 'POST', {
       vocabularyId,
       correct,
       answeredAt: new Date().toISOString(),
@@ -89,6 +96,6 @@ export class ApiClient {
 
   // ── Progress ───────────────────────────────────────────────────
   async getProgress(): Promise<UserProgress> {
-    return window.electronAPI.apiRequest('/api/progress', 'GET') as Promise<UserProgress>;
+    return getAPI().apiRequest('/api/progress', 'GET') as Promise<UserProgress>;
   }
 }

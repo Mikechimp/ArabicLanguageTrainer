@@ -34,3 +34,5 @@ Thumbs.db
 
 # ─── App Data ────────────────────────────────────────────────────────
 trainer-data.json
+# Build artifacts
+index.html
