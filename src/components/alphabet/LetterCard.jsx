@@ -1,4 +1,5 @@
 import { useGame } from '../../context/GameContext.jsx';
+import { playTap } from '../../utils/sounds.js';
 
 export default function LetterCard({ letter, onClick }) {
   const { state } = useGame();
@@ -8,7 +9,7 @@ export default function LetterCard({ letter, onClick }) {
   return (
     <div
       className={`letter-card${mastered ? ' mastered' : ''}`}
-      onClick={onClick}
+      onClick={() => { playTap(); onClick(); }}
     >
       <div className="mastery-dot" />
       <div className="ar">{letter.ar}</div>

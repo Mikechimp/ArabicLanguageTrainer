@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { playCombo } from '../../utils/sounds.js';
 
 let showComboGlobal = null;
 
@@ -13,6 +14,7 @@ export default function ComboPopup() {
   const show = useCallback((msg) => {
     setText(msg);
     setVisible(true);
+    playCombo();
     setTimeout(() => setVisible(false), 1500);
   }, []);
 

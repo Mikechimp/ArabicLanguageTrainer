@@ -1,6 +1,7 @@
-import { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
+import { createContext, useContext, useReducer, useEffect, useCallback, useRef } from 'react';
 import LETTERS from '../data/letters.json';
 import { xpForLevel } from '../utils/xp-calculator.js';
+import { playLevelUp } from '../utils/sounds.js';
 
 const STORAGE_KEY = 'arabic-mastery-state';
 
@@ -95,9 +96,14 @@ const GameContext = createContext(null);
 
 export function GameProvider({ children }) {
   const [state, dispatch] = useReducer(gameReducer, null, loadState);
+  const prevLevel = useRef(state.level);
 
   useEffect(() => {
     saveState(state);
+    if (state.level > prevLevel.current) {
+      playLevelUp();
+    }
+    prevLevel.current = state.level;
   }, [state]);
 
   const correctAnswer = useCallback((xp, letterName) => {

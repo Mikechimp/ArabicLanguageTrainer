@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { playNav } from '../../utils/sounds.js';
 
 const tabs = [
   { path: '/', icon: 'ا', label: 'Alphabet' },
@@ -18,6 +19,7 @@ export default function NavTabs() {
           className={({ isActive }) =>
             `nav-tab${isActive ? ' active' : ''}`
           }
+          onClick={playNav}
         >
           <span className="tab-icon">{tab.icon}</span> {tab.label}
         </NavLink>

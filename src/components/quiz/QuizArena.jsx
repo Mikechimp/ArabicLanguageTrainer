@@ -3,6 +3,7 @@ import { useGame } from '../../context/GameContext.jsx';
 import { generateQuizQuestion } from '../../utils/quiz-generators.js';
 import { calculateXP } from '../../utils/xp-calculator.js';
 import { triggerCombo } from '../shared/ComboPopup.jsx';
+import { playCorrect, playWrong } from '../../utils/sounds.js';
 import DifficultySelector from './DifficultySelector.jsx';
 import QuizPrompt from './QuizPrompt.jsx';
 import QuizOptions from './QuizOptions.jsx';
@@ -35,6 +36,7 @@ export default function QuizArena() {
     if (index === question.correctIndex) {
       const xp = calculateXP(difficulty, state.streak + 1);
       correctAnswer(xp, question.letter?.name);
+      playCorrect();
       const newStreak = state.streak + 1;
       setFeedback({
         show: true,
@@ -46,6 +48,7 @@ export default function QuizArena() {
       if (newStreak === 20) triggerCombo('💎 20 STREAK!!!');
     } else {
       wrongAnswer();
+      playWrong();
       setFeedback({
         show: true,
         correct: false,

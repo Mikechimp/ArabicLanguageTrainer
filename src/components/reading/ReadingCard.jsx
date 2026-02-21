@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { stringSimilarity, normalizeTransliteration } from '../../utils/string-similarity.js';
 import { calculateXP } from '../../utils/xp-calculator.js';
 import { useGame } from '../../context/GameContext.jsx';
+import { playCorrect, playWrong } from '../../utils/sounds.js';
 
 export default function ReadingCard({ sentence }) {
   const { state, correctAnswer, wrongAnswer } = useGame();
@@ -17,6 +18,7 @@ export default function ReadingCard({ sentence }) {
     if (similarity > 0.7) {
       const xp = calculateXP('reading', state.streak + 1);
       correctAnswer(xp, null);
+      playCorrect();
       setFeedback({
         correct: true,
         message: `✓ "${sentence.tr}" — ${sentence.en} — +${xp} XP`,
@@ -24,6 +26,7 @@ export default function ReadingCard({ sentence }) {
       setDisabled(true);
     } else {
       wrongAnswer();
+      playWrong();
       setFeedback({
         correct: false,
         message: `Try again! The answer is: ${sentence.tr} (${sentence.en})`,

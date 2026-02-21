@@ -4,6 +4,7 @@ import VOCAB from '../../data/vocabulary.json';
 import { shuffle } from '../../utils/shuffle.js';
 import { calculateXP } from '../../utils/xp-calculator.js';
 import { useGame } from '../../context/GameContext.jsx';
+import { playLetterPlace, playWrong, playWordComplete } from '../../utils/sounds.js';
 import LetterSlots from './LetterSlots.jsx';
 import LetterChoices from './LetterChoices.jsx';
 import QuizFeedback from '../quiz/QuizFeedback.jsx';
@@ -58,14 +59,18 @@ export default function WordBuilder() {
         setComplete(true);
         const xp = calculateXP('wordBuilder', state.streak + 1);
         correctAnswer(xp, null);
+        playWordComplete();
         setFeedback({
           show: true,
           correct: true,
           message: `🎉 Perfect! "${word.en}" — +${xp} XP`,
         });
+      } else {
+        playLetterPlace();
       }
     } else {
       breakStreak();
+      playWrong();
       setWrongIndex(choiceIndex);
       setFeedback({
         show: true,
