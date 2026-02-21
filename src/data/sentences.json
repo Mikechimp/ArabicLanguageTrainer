@@ -1,0 +1,17 @@
+[
+  { "ar":"السلام عليكم", "tr":"as-salāmu 'alaykum", "en":"Peace be upon you (greeting)", "hint":"Common Arabic greeting" },
+  { "ar":"أنا من أمريكا", "tr":"anā min amrīkā", "en":"I am from America", "hint":"Introduction phrase" },
+  { "ar":"ما اسمك؟", "tr":"mā ismuk?", "en":"What is your name?", "hint":"Asking someone's name" },
+  { "ar":"شكراً جزيلاً", "tr":"shukran jazīlan", "en":"Thank you very much", "hint":"Expressing gratitude" },
+  { "ar":"الحمد لله", "tr":"al-ḥamdu lillāh", "en":"Praise be to God", "hint":"Very common phrase" },
+  { "ar":"إن شاء الله", "tr":"in shā' allāh", "en":"God willing", "hint":"Used when talking about future plans" },
+  { "ar":"كيف حالك؟", "tr":"kayfa ḥāluk?", "en":"How are you?", "hint":"Asking about wellbeing" },
+  { "ar":"أهلاً وسهلاً", "tr":"ahlan wa sahlan", "en":"Welcome", "hint":"Greeting/welcoming someone" },
+  { "ar":"مع السلامة", "tr":"ma'a as-salāma", "en":"Goodbye (go with peace)", "hint":"Farewell phrase" },
+  { "ar":"صباح الخير", "tr":"ṣabāḥ al-khayr", "en":"Good morning", "hint":"Morning greeting" },
+  { "ar":"مساء النور", "tr":"masā' an-nūr", "en":"Good evening", "hint":"Evening greeting" },
+  { "ar":"أنا أحب القهوة", "tr":"anā uḥibbu al-qahwa", "en":"I love coffee", "hint":"Expressing preference" },
+  { "ar":"الكتاب على الطاولة", "tr":"al-kitāb 'alā aṭ-ṭāwila", "en":"The book is on the table", "hint":"Basic sentence structure" },
+  { "ar":"هذا بيت كبير", "tr":"hādhā bayt kabīr", "en":"This is a big house", "hint":"Descriptive sentence" },
+  { "ar":"الماء بارد", "tr":"al-mā' bārid", "en":"The water is cold", "hint":"Simple description" }
+]
