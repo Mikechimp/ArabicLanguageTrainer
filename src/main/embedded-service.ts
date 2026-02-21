@@ -327,7 +327,22 @@ export class EmbeddedService {
       if (this.dataPath && fs.existsSync(this.dataPath)) {
         const raw = fs.readFileSync(this.dataPath, 'utf-8');
         const data = JSON.parse(raw);
-        if (data.vocabulary) this.vocabulary = data.vocabulary;
+        if (data.vocabulary) {
+          // Merge saved progress into current vocabulary.
+          // This ensures new words added in updates appear while
+          // keeping the user's progress on existing words.
+          const savedMap = new Map<string, VocabularyItem>();
+          for (const item of data.vocabulary) {
+            savedMap.set(item.id, item);
+          }
+          this.vocabulary = VOCABULARY.map(word => {
+            const saved = savedMap.get(word.id);
+            if (saved) {
+              return { ...word, timesCorrect: saved.timesCorrect, timesIncorrect: saved.timesIncorrect, lastReviewed: saved.lastReviewed };
+            }
+            return { ...word };
+          });
+        }
         if (data.quizHistory) this.quizHistory = data.quizHistory;
         if (data.streak !== undefined) this.streak = data.streak;
       }
