@@ -1,0 +1,49 @@
+{
+  "name": "arabic-language-trainer",
+  "productName": "Arabic Language Trainer",
+  "version": "1.0.0",
+  "description": "Desktop application for learning Arabic with Electron + C# .NET backend",
+  "main": ".webpack/main",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "build:backend": "dotnet build src/backend/ArabicTrainer.Api/ArabicTrainer.Api.csproj -c Release -o dist/backend",
+    "start:full": "npm run build:backend && npm start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://local_proxy@127.0.0.1:34900/git/Mikechimp/ArabicLanguageTrainer"
+  },
+  "keywords": [
+    "arabic",
+    "language-learning",
+    "electron",
+    "desktop-app"
+  ],
+  "author": "Mikechimp",
+  "license": "MIT",
+  "config": {
+    "forge": "./forge.config.js"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^7.11.1",
+    "@electron-forge/maker-deb": "^7.11.1",
+    "@electron-forge/maker-zip": "^7.11.1",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.11.1",
+    "@electron-forge/plugin-fuses": "^7.11.1",
+    "@electron-forge/plugin-webpack": "^7.11.1",
+    "@electron/fuses": "^1.8.0",
+    "@vercel/webpack-asset-relocator-loader": "^1.10.0",
+    "css-loader": "^7.1.4",
+    "electron": "^40.6.0",
+    "fork-ts-checker-webpack-plugin": "^9.1.0",
+    "html-webpack-plugin": "^5.6.6",
+    "style-loader": "^4.0.0",
+    "ts-loader": "^9.5.4",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.1"
+  }
+}
