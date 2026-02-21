@@ -55,6 +55,18 @@ export interface Category {
   icon: string;
 }
 
+export interface ReadingPassage {
+  id: string;
+  surah: string;
+  surahNumber: number;
+  ayah: number;
+  arabic: string;
+  transliteration: string;
+  translation: string;
+  wordByWord: { arabic: string; transliteration: string; english: string }[];
+  difficulty: number;
+}
+
 function getAPI() {
   if (!window.electronAPI) {
     throw new Error('electronAPI not available - preload script may not have loaded');
@@ -97,5 +109,14 @@ export class ApiClient {
   // ── Progress ───────────────────────────────────────────────────
   async getProgress(): Promise<UserProgress> {
     return getAPI().apiRequest('/api/progress', 'GET') as Promise<UserProgress>;
+  }
+
+  // ── Reading Passages ──────────────────────────────────────────
+  async getReadingPassages(): Promise<ReadingPassage[]> {
+    return getAPI().apiRequest('/api/reading', 'GET') as Promise<ReadingPassage[]>;
+  }
+
+  async getReadingPassagesBySurah(surahNumber: number): Promise<ReadingPassage[]> {
+    return getAPI().apiRequest(`/api/reading/${surahNumber}`, 'GET') as Promise<ReadingPassage[]>;
   }
 }

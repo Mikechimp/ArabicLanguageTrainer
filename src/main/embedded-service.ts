@@ -61,6 +61,36 @@ interface UserProgress {
 // ─── Vocabulary Data ─────────────────────────────────────────────────
 
 const VOCABULARY: VocabularyItem[] = [
+  // Alphabet
+  { id: 'a1', arabic: 'ا', transliteration: 'alif', english: 'Alif (a/aa)', category: 'Alphabet', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'a2', arabic: 'ب', transliteration: 'ba', english: 'Ba (b)', category: 'Alphabet', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'a3', arabic: 'ت', transliteration: 'ta', english: 'Ta (t)', category: 'Alphabet', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'a4', arabic: 'ث', transliteration: 'tha', english: 'Tha (th)', category: 'Alphabet', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'a5', arabic: 'ج', transliteration: 'jim', english: 'Jim (j)', category: 'Alphabet', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'a6', arabic: 'ح', transliteration: 'ha', english: 'Ha (h - emphatic)', category: 'Alphabet', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'a7', arabic: 'خ', transliteration: 'kha', english: 'Kha (kh)', category: 'Alphabet', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'a8', arabic: 'د', transliteration: 'dal', english: 'Dal (d)', category: 'Alphabet', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'a9', arabic: 'ذ', transliteration: 'dhal', english: 'Dhal (dh)', category: 'Alphabet', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'a10', arabic: 'ر', transliteration: 'ra', english: 'Ra (r)', category: 'Alphabet', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'a11', arabic: 'ز', transliteration: 'zay', english: 'Zay (z)', category: 'Alphabet', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'a12', arabic: 'س', transliteration: 'sin', english: 'Sin (s)', category: 'Alphabet', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'a13', arabic: 'ش', transliteration: 'shin', english: 'Shin (sh)', category: 'Alphabet', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'a14', arabic: 'ص', transliteration: 'sad', english: 'Sad (s - emphatic)', category: 'Alphabet', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'a15', arabic: 'ض', transliteration: 'dad', english: 'Dad (d - emphatic)', category: 'Alphabet', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'a16', arabic: 'ط', transliteration: 'ta', english: 'Ta (t - emphatic)', category: 'Alphabet', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'a17', arabic: 'ظ', transliteration: 'dha', english: 'Dha (dh - emphatic)', category: 'Alphabet', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'a18', arabic: 'ع', transliteration: '\'ayn', english: 'Ayn (deep throat sound)', category: 'Alphabet', difficulty: 3, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'a19', arabic: 'غ', transliteration: 'ghayn', english: 'Ghayn (gh)', category: 'Alphabet', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'a20', arabic: 'ف', transliteration: 'fa', english: 'Fa (f)', category: 'Alphabet', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'a21', arabic: 'ق', transliteration: 'qaf', english: 'Qaf (q - deep)', category: 'Alphabet', difficulty: 3, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'a22', arabic: 'ك', transliteration: 'kaf', english: 'Kaf (k)', category: 'Alphabet', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'a23', arabic: 'ل', transliteration: 'lam', english: 'Lam (l)', category: 'Alphabet', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'a24', arabic: 'م', transliteration: 'mim', english: 'Mim (m)', category: 'Alphabet', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'a25', arabic: 'ن', transliteration: 'nun', english: 'Nun (n)', category: 'Alphabet', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'a26', arabic: 'ه', transliteration: 'ha', english: 'Ha (h - soft)', category: 'Alphabet', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'a27', arabic: 'و', transliteration: 'waw', english: 'Waw (w/oo)', category: 'Alphabet', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'a28', arabic: 'ي', transliteration: 'ya', english: 'Ya (y/ee)', category: 'Alphabet', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+
   // Greetings
   { id: 'g1', arabic: 'مرحبا', transliteration: 'marhaba', english: 'Hello', category: 'Greetings', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
   { id: 'g2', arabic: 'السلام عليكم', transliteration: 'as-salamu alaykum', english: 'Peace be upon you', category: 'Greetings', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
@@ -135,6 +165,184 @@ const VOCABULARY: VocabularyItem[] = [
   { id: 'p16', arabic: 'إن شاء الله', transliteration: 'in sha\' allah', english: 'God willing', category: 'Phrases', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
 ];
 
+// ─── Quran Reading Passages ─────────────────────────────────────────
+
+interface QuranPassage {
+  id: string;
+  surah: string;
+  surahNumber: number;
+  ayah: number;
+  arabic: string;
+  transliteration: string;
+  translation: string;
+  wordByWord: { arabic: string; transliteration: string; english: string }[];
+  difficulty: number;
+}
+
+const QURAN_PASSAGES: QuranPassage[] = [
+  // Al-Fatiha (The Opening) - complete
+  {
+    id: 'q1_1', surah: 'Al-Fatiha', surahNumber: 1, ayah: 1,
+    arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
+    transliteration: 'Bismillahir rahmanir raheem',
+    translation: 'In the name of God, the Most Gracious, the Most Merciful',
+    wordByWord: [
+      { arabic: 'بِسْمِ', transliteration: 'bismi', english: 'In the name' },
+      { arabic: 'اللَّهِ', transliteration: 'allahi', english: 'of God' },
+      { arabic: 'الرَّحْمَٰنِ', transliteration: 'ar-rahmani', english: 'the Most Gracious' },
+      { arabic: 'الرَّحِيمِ', transliteration: 'ar-raheemi', english: 'the Most Merciful' },
+    ],
+    difficulty: 1,
+  },
+  {
+    id: 'q1_2', surah: 'Al-Fatiha', surahNumber: 1, ayah: 2,
+    arabic: 'الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ',
+    transliteration: 'Alhamdu lillahi rabbil \'aalameen',
+    translation: 'All praise is due to God, Lord of all the worlds',
+    wordByWord: [
+      { arabic: 'الْحَمْدُ', transliteration: 'al-hamdu', english: 'All praise' },
+      { arabic: 'لِلَّهِ', transliteration: 'lillahi', english: 'is due to God' },
+      { arabic: 'رَبِّ', transliteration: 'rabbi', english: 'Lord' },
+      { arabic: 'الْعَالَمِينَ', transliteration: 'al-\'aalameen', english: 'of the worlds' },
+    ],
+    difficulty: 1,
+  },
+  {
+    id: 'q1_3', surah: 'Al-Fatiha', surahNumber: 1, ayah: 3,
+    arabic: 'الرَّحْمَٰنِ الرَّحِيمِ',
+    transliteration: 'Ar-rahmanir raheem',
+    translation: 'The Most Gracious, the Most Merciful',
+    wordByWord: [
+      { arabic: 'الرَّحْمَٰنِ', transliteration: 'ar-rahmani', english: 'The Most Gracious' },
+      { arabic: 'الرَّحِيمِ', transliteration: 'ar-raheemi', english: 'the Most Merciful' },
+    ],
+    difficulty: 1,
+  },
+  {
+    id: 'q1_4', surah: 'Al-Fatiha', surahNumber: 1, ayah: 4,
+    arabic: 'مَالِكِ يَوْمِ الدِّينِ',
+    transliteration: 'Maliki yawmid deen',
+    translation: 'Master of the Day of Judgment',
+    wordByWord: [
+      { arabic: 'مَالِكِ', transliteration: 'maliki', english: 'Master/Owner' },
+      { arabic: 'يَوْمِ', transliteration: 'yawmi', english: 'of the Day' },
+      { arabic: 'الدِّينِ', transliteration: 'ad-deeni', english: 'of Judgment' },
+    ],
+    difficulty: 1,
+  },
+  {
+    id: 'q1_5', surah: 'Al-Fatiha', surahNumber: 1, ayah: 5,
+    arabic: 'إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ',
+    transliteration: 'Iyyaka na\'budu wa iyyaka nasta\'een',
+    translation: 'You alone we worship, and You alone we ask for help',
+    wordByWord: [
+      { arabic: 'إِيَّاكَ', transliteration: 'iyyaka', english: 'You alone' },
+      { arabic: 'نَعْبُدُ', transliteration: 'na\'budu', english: 'we worship' },
+      { arabic: 'وَإِيَّاكَ', transliteration: 'wa iyyaka', english: 'and You alone' },
+      { arabic: 'نَسْتَعِينُ', transliteration: 'nasta\'een', english: 'we ask for help' },
+    ],
+    difficulty: 2,
+  },
+  {
+    id: 'q1_6', surah: 'Al-Fatiha', surahNumber: 1, ayah: 6,
+    arabic: 'اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ',
+    transliteration: 'Ihdinas siratal mustaqeem',
+    translation: 'Guide us to the straight path',
+    wordByWord: [
+      { arabic: 'اهْدِنَا', transliteration: 'ihdina', english: 'Guide us' },
+      { arabic: 'الصِّرَاطَ', transliteration: 'as-sirata', english: 'to the path' },
+      { arabic: 'الْمُسْتَقِيمَ', transliteration: 'al-mustaqeema', english: 'the straight' },
+    ],
+    difficulty: 2,
+  },
+  {
+    id: 'q1_7', surah: 'Al-Fatiha', surahNumber: 1, ayah: 7,
+    arabic: 'صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ',
+    transliteration: 'Siratal ladhina an\'amta \'alayhim ghayril maghdubi \'alayhim walad daalleen',
+    translation: 'The path of those upon whom You have bestowed favor, not of those who have earned anger nor of those who are astray',
+    wordByWord: [
+      { arabic: 'صِرَاطَ', transliteration: 'sirata', english: 'The path' },
+      { arabic: 'الَّذِينَ', transliteration: 'alladhina', english: 'of those whom' },
+      { arabic: 'أَنْعَمْتَ', transliteration: 'an\'amta', english: 'You have blessed' },
+      { arabic: 'عَلَيْهِمْ', transliteration: '\'alayhim', english: 'upon them' },
+      { arabic: 'غَيْرِ', transliteration: 'ghayri', english: 'not' },
+      { arabic: 'الْمَغْضُوبِ', transliteration: 'al-maghdubi', english: 'those who earned wrath' },
+      { arabic: 'عَلَيْهِمْ', transliteration: '\'alayhim', english: 'upon them' },
+      { arabic: 'وَلَا', transliteration: 'wa la', english: 'and not' },
+      { arabic: 'الضَّالِّينَ', transliteration: 'ad-daalleen', english: 'those astray' },
+    ],
+    difficulty: 3,
+  },
+  // Al-Ikhlas (Sincerity) - complete
+  {
+    id: 'q112_1', surah: 'Al-Ikhlas', surahNumber: 112, ayah: 1,
+    arabic: 'قُلْ هُوَ اللَّهُ أَحَدٌ',
+    transliteration: 'Qul huwa Allahu ahad',
+    translation: 'Say: He is God, the One',
+    wordByWord: [
+      { arabic: 'قُلْ', transliteration: 'qul', english: 'Say' },
+      { arabic: 'هُوَ', transliteration: 'huwa', english: 'He is' },
+      { arabic: 'اللَّهُ', transliteration: 'allahu', english: 'God' },
+      { arabic: 'أَحَدٌ', transliteration: 'ahad', english: 'the One' },
+    ],
+    difficulty: 1,
+  },
+  {
+    id: 'q112_2', surah: 'Al-Ikhlas', surahNumber: 112, ayah: 2,
+    arabic: 'اللَّهُ الصَّمَدُ',
+    transliteration: 'Allahus samad',
+    translation: 'God, the Eternal Refuge',
+    wordByWord: [
+      { arabic: 'اللَّهُ', transliteration: 'allahu', english: 'God' },
+      { arabic: 'الصَّمَدُ', transliteration: 'as-samad', english: 'the Eternal Refuge' },
+    ],
+    difficulty: 1,
+  },
+  {
+    id: 'q112_3', surah: 'Al-Ikhlas', surahNumber: 112, ayah: 3,
+    arabic: 'لَمْ يَلِدْ وَلَمْ يُولَدْ',
+    transliteration: 'Lam yalid wa lam yulad',
+    translation: 'He neither begets nor is born',
+    wordByWord: [
+      { arabic: 'لَمْ', transliteration: 'lam', english: 'Not' },
+      { arabic: 'يَلِدْ', transliteration: 'yalid', english: 'He begets' },
+      { arabic: 'وَلَمْ', transliteration: 'wa lam', english: 'and not' },
+      { arabic: 'يُولَدْ', transliteration: 'yulad', english: 'is He born' },
+    ],
+    difficulty: 2,
+  },
+  {
+    id: 'q112_4', surah: 'Al-Ikhlas', surahNumber: 112, ayah: 4,
+    arabic: 'وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ',
+    transliteration: 'Wa lam yakun lahu kufuwan ahad',
+    translation: 'Nor is there to Him any equivalent',
+    wordByWord: [
+      { arabic: 'وَلَمْ', transliteration: 'wa lam', english: 'And not' },
+      { arabic: 'يَكُن', transliteration: 'yakun', english: 'is there' },
+      { arabic: 'لَّهُ', transliteration: 'lahu', english: 'to Him' },
+      { arabic: 'كُفُوًا', transliteration: 'kufuwan', english: 'equivalent' },
+      { arabic: 'أَحَدٌ', transliteration: 'ahad', english: 'anyone' },
+    ],
+    difficulty: 2,
+  },
+  // Ayat al-Kursi (The Throne Verse) - 2:255
+  {
+    id: 'q2_255', surah: 'Al-Baqarah', surahNumber: 2, ayah: 255,
+    arabic: 'اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ',
+    transliteration: 'Allahu la ilaha illa huwal hayyul qayyum',
+    translation: 'God - there is no deity except Him, the Ever-Living, the Sustainer of existence',
+    wordByWord: [
+      { arabic: 'اللَّهُ', transliteration: 'allahu', english: 'God' },
+      { arabic: 'لَا إِلَٰهَ', transliteration: 'la ilaha', english: 'there is no deity' },
+      { arabic: 'إِلَّا', transliteration: 'illa', english: 'except' },
+      { arabic: 'هُوَ', transliteration: 'huwa', english: 'Him' },
+      { arabic: 'الْحَيُّ', transliteration: 'al-hayyu', english: 'the Ever-Living' },
+      { arabic: 'الْقَيُّومُ', transliteration: 'al-qayyum', english: 'the Sustainer' },
+    ],
+    difficulty: 3,
+  },
+];
+
 // ─── Service Implementation ──────────────────────────────────────────
 
 export class EmbeddedService {
@@ -194,6 +402,13 @@ export class EmbeddedService {
       if (url === '/api/progress' && method === 'GET') {
         return this.getProgress();
       }
+      if (url === '/api/reading' && method === 'GET') {
+        return this.getReadingPassages();
+      }
+      if (url.startsWith('/api/reading/') && method === 'GET') {
+        const surahNum = parseInt(url.split('/api/reading/')[1], 10);
+        return this.getReadingPassagesBySurah(surahNum);
+      }
 
       return { error: 'Not found', status: 404 };
     } catch (err) {
@@ -215,6 +430,7 @@ export class EmbeddedService {
   private getCategories(): { name: string; count: number; icon: string }[] {
     const categoryMap = new Map<string, number>();
     const icons: Record<string, string> = {
+      'Alphabet': 'type',
       'Greetings': 'hand-wave',
       'Numbers': 'hash',
       'Common Words': 'book-open',
@@ -304,6 +520,16 @@ export class EmbeddedService {
         : null,
       categoryProgress,
     };
+  }
+
+  // ─── Reading Passages ────────────────────────────────────────────
+
+  private getReadingPassages(): QuranPassage[] {
+    return QURAN_PASSAGES;
+  }
+
+  private getReadingPassagesBySurah(surahNumber: number): QuranPassage[] {
+    return QURAN_PASSAGES.filter(p => p.surahNumber === surahNumber);
   }
 
   // ─── Data Persistence ────────────────────────────────────────────
