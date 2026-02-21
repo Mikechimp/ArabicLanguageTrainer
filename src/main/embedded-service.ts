@@ -71,15 +71,28 @@ const VOCABULARY: VocabularyItem[] = [
   { id: 'g7', arabic: 'عفوا', transliteration: 'afwan', english: 'You\'re welcome', category: 'Greetings', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
   { id: 'g8', arabic: 'من فضلك', transliteration: 'min fadlik', english: 'Please', category: 'Greetings', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
 
-  // Numbers
+  // Numbers (1-10)
   { id: 'n1', arabic: 'واحد', transliteration: 'wahid', english: 'One', category: 'Numbers', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
   { id: 'n2', arabic: 'اثنان', transliteration: 'ithnan', english: 'Two', category: 'Numbers', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
   { id: 'n3', arabic: 'ثلاثة', transliteration: 'thalatha', english: 'Three', category: 'Numbers', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
   { id: 'n4', arabic: 'أربعة', transliteration: 'arba\'a', english: 'Four', category: 'Numbers', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
   { id: 'n5', arabic: 'خمسة', transliteration: 'khamsa', english: 'Five', category: 'Numbers', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
-  { id: 'n6', arabic: 'عشرة', transliteration: 'ashara', english: 'Ten', category: 'Numbers', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
-  { id: 'n7', arabic: 'مئة', transliteration: 'mi\'a', english: 'Hundred', category: 'Numbers', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
-  { id: 'n8', arabic: 'ألف', transliteration: 'alf', english: 'Thousand', category: 'Numbers', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'n6', arabic: 'ستة', transliteration: 'sitta', english: 'Six', category: 'Numbers', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'n7', arabic: 'سبعة', transliteration: 'sab\'a', english: 'Seven', category: 'Numbers', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'n8', arabic: 'ثمانية', transliteration: 'thamaniya', english: 'Eight', category: 'Numbers', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'n9', arabic: 'تسعة', transliteration: 'tis\'a', english: 'Nine', category: 'Numbers', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'n10', arabic: 'عشرة', transliteration: 'ashara', english: 'Ten', category: 'Numbers', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  // Numbers (tens + units for building larger numbers)
+  { id: 'n20', arabic: 'عشرون', transliteration: 'ishrun', english: 'Twenty', category: 'Numbers', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'n30', arabic: 'ثلاثون', transliteration: 'thalathun', english: 'Thirty', category: 'Numbers', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'n40', arabic: 'أربعون', transliteration: 'arba\'un', english: 'Forty', category: 'Numbers', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'n50', arabic: 'خمسون', transliteration: 'khamsun', english: 'Fifty', category: 'Numbers', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'n60', arabic: 'ستون', transliteration: 'sittun', english: 'Sixty', category: 'Numbers', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'n70', arabic: 'سبعون', transliteration: 'sab\'un', english: 'Seventy', category: 'Numbers', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'n80', arabic: 'ثمانون', transliteration: 'thamanun', english: 'Eighty', category: 'Numbers', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'n90', arabic: 'تسعون', transliteration: 'tis\'un', english: 'Ninety', category: 'Numbers', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'n100', arabic: 'مئة', transliteration: 'mi\'a', english: 'Hundred', category: 'Numbers', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'n1000', arabic: 'ألف', transliteration: 'alf', english: 'Thousand', category: 'Numbers', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
 
   // Common Words
   { id: 'c1', arabic: 'ماء', transliteration: 'ma\'', english: 'Water', category: 'Common Words', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
@@ -90,6 +103,18 @@ const VOCABULARY: VocabularyItem[] = [
   { id: 'c6', arabic: 'مدرسة', transliteration: 'madrasa', english: 'School', category: 'Common Words', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
   { id: 'c7', arabic: 'صديق', transliteration: 'sadiq', english: 'Friend', category: 'Common Words', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
   { id: 'c8', arabic: 'عائلة', transliteration: 'a\'ila', english: 'Family', category: 'Common Words', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'c9', arabic: 'رجل', transliteration: 'rajul', english: 'Man', category: 'Common Words', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'c10', arabic: 'امرأة', transliteration: 'imra\'a', english: 'Woman', category: 'Common Words', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'c11', arabic: 'ولد', transliteration: 'walad', english: 'Boy', category: 'Common Words', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'c12', arabic: 'بنت', transliteration: 'bint', english: 'Girl', category: 'Common Words', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'c13', arabic: 'يوم', transliteration: 'yawm', english: 'Day', category: 'Common Words', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'c14', arabic: 'ليلة', transliteration: 'layla', english: 'Night', category: 'Common Words', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'c15', arabic: 'شمس', transliteration: 'shams', english: 'Sun', category: 'Common Words', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'c16', arabic: 'قمر', transliteration: 'qamar', english: 'Moon', category: 'Common Words', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'c17', arabic: 'باب', transliteration: 'bab', english: 'Door', category: 'Common Words', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'c18', arabic: 'شارع', transliteration: 'shari\'', english: 'Street', category: 'Common Words', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'c19', arabic: 'مدينة', transliteration: 'madina', english: 'City', category: 'Common Words', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'c20', arabic: 'هاتف', transliteration: 'hatif', english: 'Phone', category: 'Common Words', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
 
   // Phrases
   { id: 'p1', arabic: 'كيف حالك؟', transliteration: 'kayf halak?', english: 'How are you?', category: 'Phrases', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
@@ -98,6 +123,16 @@ const VOCABULARY: VocabularyItem[] = [
   { id: 'p4', arabic: 'اسمي...', transliteration: 'ismi...', english: 'My name is...', category: 'Phrases', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
   { id: 'p5', arabic: 'أين الحمام؟', transliteration: 'ayn al-hammam?', english: 'Where is the bathroom?', category: 'Phrases', difficulty: 3, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
   { id: 'p6', arabic: 'كم الساعة؟', transliteration: 'kam as-sa\'a?', english: 'What time is it?', category: 'Phrases', difficulty: 3, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'p7', arabic: 'أنا لا أفهم', transliteration: 'ana la afham', english: 'I don\'t understand', category: 'Phrases', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'p8', arabic: 'هل تتكلم الإنجليزية؟', transliteration: 'hal tatakallam al-injiliziyya?', english: 'Do you speak English?', category: 'Phrases', difficulty: 3, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'p9', arabic: 'أريد أن أتعلم العربية', transliteration: 'urid an ata\'allam al-\'arabiyya', english: 'I want to learn Arabic', category: 'Phrases', difficulty: 3, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'p10', arabic: 'كم الثمن؟', transliteration: 'kam ath-thaman?', english: 'How much does it cost?', category: 'Phrases', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'p11', arabic: 'أنا جائع', transliteration: 'ana ja\'i\'', english: 'I am hungry', category: 'Phrases', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'p12', arabic: 'أنا عطشان', transliteration: 'ana \'atshan', english: 'I am thirsty', category: 'Phrases', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'p13', arabic: 'ساعدني من فضلك', transliteration: 'sa\'idni min fadlik', english: 'Help me please', category: 'Phrases', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'p14', arabic: 'أين المستشفى؟', transliteration: 'ayn al-mustashfa?', english: 'Where is the hospital?', category: 'Phrases', difficulty: 3, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'p15', arabic: 'تشرفنا', transliteration: 'tasharrafna', english: 'Nice to meet you', category: 'Phrases', difficulty: 2, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
+  { id: 'p16', arabic: 'إن شاء الله', transliteration: 'in sha\' allah', english: 'God willing', category: 'Phrases', difficulty: 1, timesCorrect: 0, timesIncorrect: 0, lastReviewed: null },
 ];
 
 // ─── Service Implementation ──────────────────────────────────────────
