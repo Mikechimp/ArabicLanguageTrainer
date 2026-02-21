@@ -31,8 +31,6 @@ class App {
 
     this.registerViews();
     this.setupNavigation();
-    this.setupMenuNavigation();
-    this.checkBackendStatus();
   }
 
   private registerViews(): void {
@@ -56,25 +54,29 @@ class App {
   }
 
   private setupMenuNavigation(): void {
-    // Listen for navigation commands from the application menu
+    if (!window.electronAPI?.onNavigate) return;
     window.electronAPI.onNavigate((view: string) => {
       this.navigateTo(view);
     });
   }
 
   navigateTo(viewName: string): void {
-    // Update active nav item
     document.querySelectorAll('.nav-item').forEach(item => {
       item.classList.toggle('active', (item as HTMLElement).dataset.view === viewName);
     });
-
-    // Route to view
     this.router.navigate(viewName);
   }
 
   private async checkBackendStatus(): Promise<void> {
     const statusDot = document.querySelector('.status-dot') as HTMLElement;
     const statusText = document.querySelector('.status-text') as HTMLElement;
+    if (!statusDot || !statusText) return;
+
+    if (!window.electronAPI?.getBackendStatus) {
+      statusDot.classList.add('error');
+      statusText.textContent = 'IPC unavailable';
+      return;
+    }
 
     try {
       const status = await window.electronAPI.getBackendStatus();
@@ -86,20 +88,42 @@ class App {
         statusDot.classList.add('error');
         statusText.textContent = 'Backend offline';
       }
-    } catch {
+    } catch (err) {
       statusDot.classList.add('error');
       statusText.textContent = 'Connection error';
+      console.error('[App] Backend status check failed:', err);
     }
   }
 
   start(): void {
+    // Navigate to dashboard first (renders the UI immediately)
     this.navigateTo('dashboard');
+
+    // Then set up async features (menu nav, backend status)
+    this.setupMenuNavigation();
+    this.checkBackendStatus();
   }
 }
 
 // ─── Launch ─────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
-  const app = new App();
-  app.start();
+  try {
+    const app = new App();
+    app.start();
+  } catch (err) {
+    console.error('[App] Failed to initialize:', err);
+    const content = document.getElementById('content');
+    if (content) {
+      content.innerHTML = `
+        <div style="padding: 40px; color: #e94560;">
+          <h2>Startup Error</h2>
+          <p style="color: #8888a0; margin-top: 12px;">${err instanceof Error ? err.message : String(err)}</p>
+          <p style="color: #555570; margin-top: 8px; font-size: 0.85rem;">
+            Press Ctrl+Shift+I to open DevTools for details.
+          </p>
+        </div>
+      `;
+    }
+  }
 });
