@@ -12,8 +12,7 @@
  *                        → handles IPC between renderer and backend
  */
 
-import { app, BrowserWindow, Menu, Tray, nativeImage, ipcMain, dialog, shell } from 'electron';
-import * as path from 'path';
+import { app, BrowserWindow, Menu, ipcMain, dialog, shell } from 'electron';
 import { BackendManager } from './backend-manager';
 
 // Webpack magic variables injected by Electron Forge
@@ -25,9 +24,11 @@ if (require('electron-squirrel-startup')) {
   app.quit();
 }
 
+// Fix black/blank rendering on some Windows GPU drivers
+app.disableHardwareAcceleration();
+
 // ─── Application State ───────────────────────────────────────────────
 let mainWindow: BrowserWindow | null = null;
-let tray: Tray | null = null;
 const backendManager = new BackendManager();
 
 // ─── Window Creation ─────────────────────────────────────────────────
@@ -144,7 +145,12 @@ function registerIpcHandlers(): void {
 
   // Forward API requests from renderer to C# backend
   ipcMain.handle('backend:request', async (_event, endpoint: string, method: string, body?: unknown) => {
-    return backendManager.request(endpoint, method, body);
+    try {
+      return await backendManager.request(endpoint, method, body);
+    } catch (err) {
+      console.error(`[IPC] backend:request failed for ${method} ${endpoint}:`, err);
+      return { error: 'Request failed', status: 500 };
+    }
   });
 
   // App info
@@ -173,8 +179,12 @@ app.whenReady().then(async () => {
   createApplicationMenu();
   registerIpcHandlers();
 
-  // Start the C# backend service
-  await backendManager.start();
+  // Start the backend service (don't let failure block window creation)
+  try {
+    await backendManager.start();
+  } catch (err) {
+    console.error('[Main] Backend failed to start:', err);
+  }
 
   // Create the main window
   mainWindow = createMainWindow();

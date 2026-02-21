@@ -9,9 +9,12 @@
  *
  * The API surface is identical to the C# backend, so the renderer
  * doesn't know or care which one it's talking to.
+ *
+ * NOTE: This service handles requests directly via handleRequest() -
+ * no HTTP server needed. The BackendManager calls handleRequest()
+ * from the IPC handler in the main process.
  */
 
-import * as http from 'http';
 import * as fs from 'fs';
 import * as path from 'path';
 import { app } from 'electron';
@@ -100,92 +103,68 @@ const VOCABULARY: VocabularyItem[] = [
 // ─── Service Implementation ──────────────────────────────────────────
 
 export class EmbeddedService {
-  private server: http.Server | null = null;
+  private running = false;
   private vocabulary: VocabularyItem[] = [...VOCABULARY];
   private quizHistory: QuizResult[] = [];
   private streak = 0;
   private dataPath: string = '';
 
-  start(port: number): void {
-    this.dataPath = path.join(app.getPath('userData'), 'trainer-data.json');
-    this.loadPersistedData();
-
-    this.server = http.createServer((req, res) => {
-      // CORS headers
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-      res.setHeader('Content-Type', 'application/json');
-
-      if (req.method === 'OPTIONS') {
-        res.writeHead(200);
-        res.end();
-        return;
-      }
-
-      this.route(req, res);
-    });
-
-    this.server.listen(port, '127.0.0.1');
+  start(): void {
+    try {
+      this.dataPath = path.join(app.getPath('userData'), 'trainer-data.json');
+      this.loadPersistedData();
+    } catch (err) {
+      console.warn('[EmbeddedService] Could not load persisted data, using defaults:', err);
+      this.vocabulary = [...VOCABULARY];
+    }
+    this.running = true;
+    console.log('[EmbeddedService] Service started (direct IPC mode)');
   }
 
   stop(): void {
     this.persistData();
-    this.server?.close();
-    this.server = null;
+    this.running = false;
   }
 
   isRunning(): boolean {
-    return this.server !== null;
+    return this.running;
   }
 
   /**
-   * Handle a request directly (bypassing HTTP when called from main process)
+   * Handle a request directly (called from main process via IPC)
    */
   async handleRequest(endpoint: string, method: string, body?: unknown): Promise<unknown> {
     const url = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
 
-    // Route to the appropriate handler
-    if (url === '/api/health' && method === 'GET') {
-      return { status: 'healthy', mode: 'embedded', timestamp: new Date().toISOString() };
-    }
-    if (url === '/api/vocabulary' && method === 'GET') {
-      return this.getVocabulary();
-    }
-    if (url.startsWith('/api/vocabulary/') && method === 'GET') {
-      const category = decodeURIComponent(url.split('/api/vocabulary/')[1]);
-      return this.getVocabularyByCategory(category);
-    }
-    if (url === '/api/categories' && method === 'GET') {
-      return this.getCategories();
-    }
-    if (url === '/api/quiz' && method === 'GET') {
-      return this.generateQuiz();
-    }
-    if (url === '/api/quiz/submit' && method === 'POST') {
-      return this.submitQuizResult(body as QuizResult);
-    }
-    if (url === '/api/progress' && method === 'GET') {
-      return this.getProgress();
-    }
+    try {
+      if (url === '/api/health' && method === 'GET') {
+        return { status: 'healthy', mode: 'embedded', timestamp: new Date().toISOString() };
+      }
+      if (url === '/api/vocabulary' && method === 'GET') {
+        return this.getVocabulary();
+      }
+      if (url.startsWith('/api/vocabulary/') && method === 'GET') {
+        const category = decodeURIComponent(url.split('/api/vocabulary/')[1]);
+        return this.getVocabularyByCategory(category);
+      }
+      if (url === '/api/categories' && method === 'GET') {
+        return this.getCategories();
+      }
+      if (url === '/api/quiz' && method === 'GET') {
+        return this.generateQuiz();
+      }
+      if (url === '/api/quiz/submit' && method === 'POST') {
+        return this.submitQuizResult(body as QuizResult);
+      }
+      if (url === '/api/progress' && method === 'GET') {
+        return this.getProgress();
+      }
 
-    return { error: 'Not found', status: 404 };
-  }
-
-  // ─── Route Handler ───────────────────────────────────────────────
-
-  private route(req: http.IncomingMessage, res: http.ServerResponse): void {
-    const url = req.url || '/';
-    const method = req.method || 'GET';
-
-    let body = '';
-    req.on('data', (chunk) => { body += chunk; });
-    req.on('end', async () => {
-      const parsedBody = body ? JSON.parse(body) : undefined;
-      const result = await this.handleRequest(url, method, parsedBody);
-      res.writeHead(200);
-      res.end(JSON.stringify(result));
-    });
+      return { error: 'Not found', status: 404 };
+    } catch (err) {
+      console.error(`[EmbeddedService] Error handling ${method} ${url}:`, err);
+      return { error: 'Internal error', status: 500 };
+    }
   }
 
   // ─── API Handlers ────────────────────────────────────────────────
@@ -223,7 +202,6 @@ export class EmbeddedService {
     const selected = shuffled.slice(0, Math.min(count, shuffled.length));
 
     return selected.map(item => {
-      // Generate 3 wrong answers from other vocabulary
       const others = this.vocabulary
         .filter(v => v.id !== item.id)
         .sort(() => Math.random() - 0.5)
@@ -297,6 +275,7 @@ export class EmbeddedService {
 
   private persistData(): void {
     try {
+      if (!this.dataPath) return;
       const data = {
         vocabulary: this.vocabulary,
         quizHistory: this.quizHistory,
@@ -310,7 +289,7 @@ export class EmbeddedService {
 
   private loadPersistedData(): void {
     try {
-      if (fs.existsSync(this.dataPath)) {
+      if (this.dataPath && fs.existsSync(this.dataPath)) {
         const raw = fs.readFileSync(this.dataPath, 'utf-8');
         const data = JSON.parse(raw);
         if (data.vocabulary) this.vocabulary = data.vocabulary;
