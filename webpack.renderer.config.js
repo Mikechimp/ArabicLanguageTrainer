@@ -34,6 +34,10 @@ const rules = [
 ];
 
 module.exports = {
+  // 'web' target is required because the renderer runs with sandbox: true
+  // (no Node.js APIs). The default 'electron-renderer' target generates
+  // code that calls require(), which doesn't exist in a sandboxed renderer.
+  target: 'web',
   module: {
     rules,
   },

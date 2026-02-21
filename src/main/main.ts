@@ -56,6 +56,10 @@ function createMainWindow(): BrowserWindow {
   window.once('ready-to-show', () => {
     window.show();
     window.focus();
+    // Open DevTools in development for debugging
+    if (!app.isPackaged) {
+      window.webContents.openDevTools({ mode: 'bottom' });
+    }
   });
 
   window.on('closed', () => {
