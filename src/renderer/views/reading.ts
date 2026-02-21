@@ -94,11 +94,17 @@ export class ReadingView implements View {
   private async loadPassages(container: HTMLElement): Promise<void> {
     try {
       this.passages = await this.api.getReadingPassages();
+      if (!this.passages || this.passages.length === 0) {
+        const content = container.querySelector('#reading-content');
+        if (content) content.innerHTML = '<div class="empty-state"><p>No reading passages available</p></div>';
+        return;
+      }
       this.buildSurahFilter(container);
       this.renderPassage(container);
-    } catch {
+    } catch (err) {
+      console.error('[ReadingView] Failed to load passages:', err);
       const content = container.querySelector('#reading-content');
-      if (content) content.innerHTML = '<div class="empty-state"><p>Failed to load passages</p></div>';
+      if (content) content.innerHTML = `<div class="empty-state"><p>Failed to load passages</p><p style="font-size:0.8rem;color:var(--text-muted);margin-top:8px;">${err instanceof Error ? err.message : 'Unknown error'}</p></div>`;
     }
   }
 
