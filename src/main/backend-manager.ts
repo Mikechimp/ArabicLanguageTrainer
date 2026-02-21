@@ -59,10 +59,10 @@ export class BackendManager {
       }
     }
 
-    // Fallback: use embedded TypeScript service
+    // Fallback: use embedded TypeScript service (direct IPC, no HTTP)
     this.mode = 'embedded';
-    this.embeddedService.start(this.port);
-    console.log(`[BackendManager] Embedded service started on port ${this.port}`);
+    this.embeddedService.start();
+    console.log('[BackendManager] Embedded service started');
   }
 
   /**
@@ -102,14 +102,9 @@ export class BackendManager {
   // ─── Private Methods ─────────────────────────────────────────────
 
   private findBackendExecutable(): string | null {
-    // Check for published backend in various locations
     const possiblePaths = [
-      // Development: built output
       path.join(app.getAppPath(), '..', 'dist', 'backend', 'ArabicTrainer.Api'),
-      // Packaged: extraResource
       path.join(process.resourcesPath || '', 'backend', 'ArabicTrainer.Api'),
-      // Linux/Mac
-      path.join(app.getAppPath(), '..', 'dist', 'backend', 'ArabicTrainer.Api'),
     ];
 
     for (const p of possiblePaths) {
