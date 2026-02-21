@@ -1,5 +1,12 @@
 module.exports = {
   entry: './src/main/main.ts',
+  // Replace __dirname/__filename with webpack-computed paths.
+  // The preload script shares this config and runs sandboxed where
+  // __dirname is not available at runtime.
+  node: {
+    __dirname: true,
+    __filename: true,
+  },
   module: {
     rules: [
       {

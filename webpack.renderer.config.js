@@ -1,18 +1,7 @@
 const rules = [
-  {
-    test: /native_modules[/\\].+\.node$/,
-    use: 'node-loader',
-  },
-  {
-    test: /[/\\]node_modules[/\\].+\.(m?js|node)$/,
-    parser: { amd: false },
-    use: {
-      loader: '@vercel/webpack-asset-relocator-loader',
-      options: {
-        outputAssetBase: 'native_modules',
-      },
-    },
-  },
+  // No node-loader or asset-relocator-loader here.
+  // The renderer runs sandboxed (no Node.js) so native .node
+  // modules can't be loaded and __dirname doesn't exist.
   {
     test: /\.tsx?$/,
     exclude: /(node_modules|\.webpack)/,
