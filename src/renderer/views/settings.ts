@@ -53,15 +53,15 @@ export class SettingsView implements View {
           </div>
           <div style="display: flex; justify-content: space-between; padding: 4px 0;">
             <span style="color: var(--text-secondary);">Electron</span>
-            <span>${process.versions?.electron || 'N/A'}</span>
+            <span id="info-electron">--</span>
           </div>
           <div style="display: flex; justify-content: space-between; padding: 4px 0;">
             <span style="color: var(--text-secondary);">Chrome</span>
-            <span>${process.versions?.chrome || 'N/A'}</span>
+            <span id="info-chrome">--</span>
           </div>
           <div style="display: flex; justify-content: space-between; padding: 4px 0;">
             <span style="color: var(--text-secondary);">Node.js</span>
-            <span>${process.versions?.node || 'N/A'}</span>
+            <span id="info-node">--</span>
           </div>
         </div>
       </div>
@@ -75,6 +75,7 @@ export class SettingsView implements View {
     try {
       const status = await this.api.getStatus();
       const version = await window.electronAPI.getVersion();
+      const sysInfo = await window.electronAPI.getSystemInfo();
 
       const dot = container.querySelector('#settings-status-dot') as HTMLElement;
       const text = container.querySelector('#settings-status-text') as HTMLElement;
@@ -98,6 +99,13 @@ export class SettingsView implements View {
       `;
 
       if (versionEl) versionEl.textContent = version;
+
+      const elElectron = container.querySelector('#info-electron');
+      const elChrome = container.querySelector('#info-chrome');
+      const elNode = container.querySelector('#info-node');
+      if (elElectron) elElectron.textContent = sysInfo.electron;
+      if (elChrome) elChrome.textContent = sysInfo.chrome;
+      if (elNode) elNode.textContent = sysInfo.node;
     } catch {
       console.error('Failed to load backend status');
     }

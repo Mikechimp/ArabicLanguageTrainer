@@ -8,6 +8,7 @@
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
+    "typecheck": "tsc --noEmit",
     "build:backend": "dotnet build src/backend/ArabicTrainer.Api/ArabicTrainer.Api.csproj -c Release -o dist/backend",
     "start:full": "npm run build:backend && npm start"
   },

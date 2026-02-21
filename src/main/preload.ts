@@ -26,6 +26,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // ── App Info ───────────────────────────────────────────────────
   getVersion: () => ipcRenderer.invoke('app:version'),
+  getSystemInfo: () => ipcRenderer.invoke('app:system-info'),
   openExternal: (url: string) => ipcRenderer.invoke('app:open-external', url),
 
   // ── Navigation Events (from menu) ─────────────────────────────
@@ -49,6 +50,7 @@ export interface ElectronAPI {
   }>;
   apiRequest: (endpoint: string, method: string, body?: unknown) => Promise<unknown>;
   getVersion: () => Promise<string>;
+  getSystemInfo: () => Promise<{ electron: string; chrome: string; node: string; platform: string }>;
   openExternal: (url: string) => Promise<void>;
   onNavigate: (callback: (view: string) => void) => () => void;
 }

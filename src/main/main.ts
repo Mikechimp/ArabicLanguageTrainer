@@ -152,6 +152,16 @@ function registerIpcHandlers(): void {
     return app.getVersion();
   });
 
+  // System info (versions) - renderer is sandboxed, so it can't access process.versions
+  ipcMain.handle('app:system-info', () => {
+    return {
+      electron: process.versions.electron,
+      chrome: process.versions.chrome,
+      node: process.versions.node,
+      platform: process.platform,
+    };
+  });
+
   // Open external links
   ipcMain.handle('app:open-external', async (_event, url: string) => {
     await shell.openExternal(url);
