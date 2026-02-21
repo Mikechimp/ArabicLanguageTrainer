@@ -25,6 +25,9 @@ if (require('electron-squirrel-startup')) {
   app.quit();
 }
 
+// Fix black/blank rendering on some Windows GPU drivers
+app.disableHardwareAcceleration();
+
 // ─── Application State ───────────────────────────────────────────────
 let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
