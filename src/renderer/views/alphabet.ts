@@ -6,9 +6,11 @@
  *   - Stroke direction guide
  *   - Pronunciation tips
  *   - Example words using that letter
+ *   - Audio pronunciation via TTS
  */
 
 import { View } from '../services/router';
+import { getTTSService, TTSState } from '../services/tts-service';
 
 interface LetterData {
   name: string;
@@ -102,11 +104,16 @@ const ALPHABET: LetterData[] = [
 export class AlphabetView implements View {
   private selectedLetter: LetterData | null = null;
   private activeTab: 'alphabet' | 'practice' = 'alphabet';
+  private tts = getTTSService();
 
   render(): HTMLElement {
     const container = document.createElement('div');
     this.renderContent(container);
     return container;
+  }
+
+  destroy(): void {
+    this.tts.stop();
   }
 
   private renderContent(container: HTMLElement): void {
@@ -156,6 +163,19 @@ export class AlphabetView implements View {
             <div class="letter-detail-info">
               <h3>${l.name} <span style="color: var(--text-muted); font-weight: 400;">(${l.transliteration})</span></h3>
               <p class="letter-sound">${l.sound}</p>
+              <button class="tts-btn tts-btn-inline" data-arabic="${l.isolated}" title="Listen to pronunciation">
+                <svg class="tts-icon tts-icon-play" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                <svg class="tts-icon tts-icon-playing" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+                  <rect x="6" y="4" width="4" height="16"/>
+                  <rect x="14" y="4" width="4" height="16"/>
+                </svg>
+                <svg class="tts-icon tts-icon-loading" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+                  <circle cx="12" cy="12" r="10" stroke-dasharray="31.4" stroke-dashoffset="10"/>
+                </svg>
+                <span>Listen</span>
+              </button>
             </div>
           </div>
 
@@ -196,6 +216,18 @@ export class AlphabetView implements View {
                   <span class="example-arabic">${ex.arabic}</span>
                   <span class="example-translit">${ex.transliteration}</span>
                   <span class="example-english">${ex.english}</span>
+                  <button class="tts-btn tts-btn-sm" data-arabic="${ex.arabic}" title="Listen">
+                    <svg class="tts-icon tts-icon-play" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polygon points="5 3 19 12 5 21 5 3"/>
+                    </svg>
+                    <svg class="tts-icon tts-icon-playing" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+                      <rect x="6" y="4" width="4" height="16"/>
+                      <rect x="14" y="4" width="4" height="16"/>
+                    </svg>
+                    <svg class="tts-icon tts-icon-loading" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+                      <circle cx="12" cy="12" r="10" stroke-dasharray="31.4" stroke-dashoffset="10"/>
+                    </svg>
+                  </button>
                 </div>
               `).join('')}
             </div>
@@ -234,6 +266,19 @@ export class AlphabetView implements View {
               <span class="practice-word-translit">${word.transliteration}</span>
               <span class="practice-word-english">${word.english}</span>
             </div>
+            <button class="tts-btn tts-btn-practice" data-arabic="${word.arabic}" title="Listen to pronunciation">
+              <svg class="tts-icon tts-icon-play" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+              <svg class="tts-icon tts-icon-playing" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+                <rect x="6" y="4" width="4" height="16"/>
+                <rect x="14" y="4" width="4" height="16"/>
+              </svg>
+              <svg class="tts-icon tts-icon-loading" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+                <circle cx="12" cy="12" r="10" stroke-dasharray="31.4" stroke-dashoffset="10"/>
+              </svg>
+              <span>Listen</span>
+            </button>
             <div class="practice-word-tip">${word.tip}</div>
           </div>
         `;
@@ -265,5 +310,53 @@ export class AlphabetView implements View {
         }
       });
     });
+
+    // TTS button handlers
+    container.querySelectorAll('.tts-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const arabic = (btn as HTMLElement).dataset.arabic;
+        if (arabic) {
+          this.playPronunciation(arabic, btn as HTMLButtonElement);
+        }
+      });
+    });
+  }
+
+  private playPronunciation(text: string, btn: HTMLButtonElement): void {
+    this.tts.speak(text, (state: TTSState) => {
+      this.setButtonState(btn, state);
+    });
+  }
+
+  private setButtonState(btn: HTMLButtonElement, state: TTSState): void {
+    const playIcon = btn.querySelector('.tts-icon-play') as HTMLElement;
+    const playingIcon = btn.querySelector('.tts-icon-playing') as HTMLElement;
+    const loadingIcon = btn.querySelector('.tts-icon-loading') as HTMLElement;
+    if (!playIcon || !playingIcon || !loadingIcon) return;
+
+    playIcon.style.display = 'none';
+    playingIcon.style.display = 'none';
+    loadingIcon.style.display = 'none';
+
+    btn.classList.remove('tts-playing', 'tts-loading', 'tts-error');
+
+    switch (state) {
+      case 'playing':
+        playingIcon.style.display = 'block';
+        btn.classList.add('tts-playing');
+        break;
+      case 'loading':
+        loadingIcon.style.display = 'block';
+        btn.classList.add('tts-loading');
+        break;
+      case 'error':
+        playIcon.style.display = 'block';
+        btn.classList.add('tts-error');
+        break;
+      default:
+        playIcon.style.display = 'block';
+        break;
+    }
   }
 }
