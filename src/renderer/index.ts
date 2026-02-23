@@ -20,6 +20,7 @@ import { ProgressView } from './views/progress';
 import { SettingsView } from './views/settings';
 import { ReadingView } from './views/reading';
 import { AlphabetView } from './views/alphabet';
+import { ResourcesView } from './views/resources';
 
 // ─── Application Bootstrap ──────────────────────────────────────────
 
@@ -41,6 +42,7 @@ class App {
     this.router.register('vocabulary', () => new VocabularyView(this.api));
     this.router.register('quiz', () => new QuizView(this.api));
     this.router.register('reading', () => new ReadingView(this.api));
+    this.router.register('resources', () => new ResourcesView());
     this.router.register('progress', () => new ProgressView(this.api));
     this.router.register('settings', () => new SettingsView(this.api));
   }
