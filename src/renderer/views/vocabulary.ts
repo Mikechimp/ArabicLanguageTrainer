@@ -15,6 +15,7 @@ export class VocabularyView implements View {
   private activeCategory: string = 'All';
   private tts = getTTSService();
   private activePlayBtn: HTMLButtonElement | null = null;
+  private ttsErrorShown = false;
 
   constructor(private api: ApiClient) {}
 
@@ -24,6 +25,12 @@ export class VocabularyView implements View {
       <div class="view-header">
         <h2>Vocabulary</h2>
         <p>Browse and learn Arabic words and phrases</p>
+      </div>
+
+      <div id="tts-error-banner" class="tts-error-banner" style="display: none;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>No Arabic text-to-speech voice found on your system. To enable audio, install an Arabic language pack in your operating system settings.</span>
+        <button class="tts-error-dismiss" title="Dismiss">&times;</button>
       </div>
 
       <div class="filter-bar" id="filter-bar">
@@ -135,6 +142,9 @@ export class VocabularyView implements View {
               <svg class="tts-icon tts-icon-loading" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
                 <circle cx="12" cy="12" r="10" stroke-dasharray="31.4" stroke-dashoffset="10"/>
               </svg>
+              <svg class="tts-icon tts-icon-error" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
             </button>
           </td>
         </tr>
@@ -171,6 +181,10 @@ export class VocabularyView implements View {
 
     this.tts.speak(text, (state: TTSState) => {
       this.setButtonState(btn, state);
+      if (state === 'error' && !this.ttsErrorShown) {
+        this.ttsErrorShown = true;
+        this.showTTSErrorBanner(btn);
+      }
       if (state === 'idle' || state === 'error') {
         this.activePlayBtn = null;
       }
@@ -181,11 +195,13 @@ export class VocabularyView implements View {
     const playIcon = btn.querySelector('.tts-icon-play') as HTMLElement;
     const playingIcon = btn.querySelector('.tts-icon-playing') as HTMLElement;
     const loadingIcon = btn.querySelector('.tts-icon-loading') as HTMLElement;
+    const errorIcon = btn.querySelector('.tts-icon-error') as HTMLElement;
     if (!playIcon || !playingIcon || !loadingIcon) return;
 
     playIcon.style.display = 'none';
     playingIcon.style.display = 'none';
     loadingIcon.style.display = 'none';
+    if (errorIcon) errorIcon.style.display = 'none';
 
     btn.classList.remove('tts-playing', 'tts-loading', 'tts-error');
 
@@ -193,18 +209,41 @@ export class VocabularyView implements View {
       case 'playing':
         playingIcon.style.display = 'block';
         btn.classList.add('tts-playing');
+        btn.title = 'Click to stop';
         break;
       case 'loading':
         loadingIcon.style.display = 'block';
         btn.classList.add('tts-loading');
+        btn.title = 'Loading audio...';
         break;
       case 'error':
-        playIcon.style.display = 'block';
+        if (errorIcon) {
+          errorIcon.style.display = 'block';
+        } else {
+          playIcon.style.display = 'block';
+        }
         btn.classList.add('tts-error');
+        btn.title = 'No Arabic voice available on this system — install an Arabic TTS voice in your OS settings';
         break;
       default:
         playIcon.style.display = 'block';
+        btn.title = 'Listen to pronunciation';
         break;
+    }
+  }
+
+  private showTTSErrorBanner(btn: HTMLButtonElement): void {
+    const container = btn.closest('div');
+    if (!container) return;
+    // Walk up to find the root container with the banner
+    const root = container.parentElement?.closest('div') || document.querySelector('#content > div');
+    const banner = root?.querySelector('#tts-error-banner') as HTMLElement;
+    if (banner) {
+      banner.style.display = 'flex';
+      const dismiss = banner.querySelector('.tts-error-dismiss');
+      dismiss?.addEventListener('click', () => {
+        banner.style.display = 'none';
+      });
     }
   }
 }
