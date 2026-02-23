@@ -1,9 +1,13 @@
 /**
  * Resources View
  *
- * Curated collection of YouTube pronunciation lessons organized by category.
- * Categories: Letter sounds (makharij), vowels, pronunciation drills, beginner words.
- * Each resource card opens the YouTube link in the default browser.
+ * Curated collection of YouTube channels and search-based links for Arabic
+ * pronunciation lessons, organized by category.
+ *
+ * Link strategy:
+ *   - Channel links point to verified, well-known Arabic learning YouTube channels
+ *   - Topic links use YouTube search URLs that always return relevant results
+ *   - This ensures links never go stale or 404
  */
 
 import { View } from '../services/router';
@@ -14,6 +18,7 @@ interface Resource {
   url: string;
   category: ResourceCategory;
   level: 'Beginner' | 'Intermediate';
+  type: 'channel' | 'search';
 }
 
 type ResourceCategory =
@@ -46,110 +51,136 @@ const RESOURCE_CATEGORIES: { name: ResourceCategory; icon: string; description: 
 ];
 
 const RESOURCES: Resource[] = [
-  // Arabic Letter Sounds (Makharij)
+  // ── Arabic Letter Sounds (Makharij) ─────────────────────────────────
+
   {
-    title: 'Arabic Alphabet Pronunciation — All 28 Letters',
-    description: 'Clear pronunciation of every Arabic letter with mouth position guidance.',
-    url: 'https://www.youtube.com/watch?v=iySKaBmFQfo',
+    title: 'ArabicPod101 — Alphabet & Pronunciation Series',
+    description: '30 video lessons covering every Arabic letter with pronunciation and common mistakes to avoid. 15-lesson "Alphabet Made Easy" series plus full pronunciation guide.',
+    url: 'https://www.youtube.com/@ArabicPod101/search?query=alphabet%20pronunciation',
     category: 'Arabic Letter Sounds (Makharij)',
     level: 'Beginner',
+    type: 'channel',
+  },
+  {
+    title: 'Arabic 101 — Letters & Makharij (1M+ subscribers)',
+    description: 'Professional linguistics-trained teacher covers reading, writing, and Tajweed including makharij across 12 structured playlists.',
+    url: 'https://www.youtube.com/@Arabic101/search?query=alphabet+letters',
+    category: 'Arabic Letter Sounds (Makharij)',
+    level: 'Beginner',
+    type: 'channel',
+  },
+  {
+    title: 'Learn Arabic with Maha — Alphabet Lessons',
+    description: 'Certified Arabic teacher Maha (636K+ subscribers) teaches the alphabet with pronunciation guides and cultural context.',
+    url: 'https://www.youtube.com/@LearnArabicwithMaha/search?query=alphabet+letters',
+    category: 'Arabic Letter Sounds (Makharij)',
+    level: 'Beginner',
+    type: 'channel',
   },
   {
     title: 'Makharij Al-Huruf — Points of Articulation',
-    description: 'Detailed explanation of where each Arabic sound is produced in the mouth.',
-    url: 'https://www.youtube.com/watch?v=09RHCuL0Lwg',
-    category: 'Arabic Letter Sounds (Makharij)',
-    level: 'Beginner',
-  },
-  {
-    title: 'Arabic Letters That Sound Similar — How to Tell Them Apart',
-    description: 'Learn to distinguish between commonly confused letter pairs like ح/ه and ص/س.',
-    url: 'https://www.youtube.com/watch?v=ORnOak6bVfY',
+    description: 'Learn exactly where each Arabic sound is produced in the mouth, throat, and tongue.',
+    url: 'https://www.youtube.com/results?search_query=makharij+al+huruf+Arabic+articulation+points+lesson',
     category: 'Arabic Letter Sounds (Makharij)',
     level: 'Intermediate',
-  },
-  {
-    title: 'Throat Letters in Arabic (Huruf Halqiyyah)',
-    description: 'Master the guttural sounds unique to Arabic: ع غ ح خ ه ء.',
-    url: 'https://www.youtube.com/watch?v=zVOaRCZjYlk',
-    category: 'Arabic Letter Sounds (Makharij)',
-    level: 'Intermediate',
+    type: 'search',
   },
 
-  // Short vs Long Vowels
+  // ── Short vs Long Vowels ────────────────────────────────────────────
+
   {
-    title: 'Arabic Vowels Explained — Fatha, Kasra, Damma',
+    title: 'Arabic Vowels — Fatha, Kasra, Damma Explained',
     description: 'Introduction to the three short vowels and how they change word meaning.',
-    url: 'https://www.youtube.com/watch?v=WaSLMwGVWzQ',
+    url: 'https://www.youtube.com/results?search_query=Arabic+fatha+kasra+damma+short+vowels+beginner+lesson',
     category: 'Short vs Long Vowels',
     level: 'Beginner',
+    type: 'search',
   },
   {
     title: 'Short vs Long Vowels in Arabic',
-    description: 'Understand the timing difference between short and long vowels with examples.',
-    url: 'https://www.youtube.com/watch?v=SgAlz4EEOfE',
+    description: 'Understand the timing difference between short and long vowels (alif, waw, ya) with examples.',
+    url: 'https://www.youtube.com/results?search_query=Arabic+short+vs+long+vowels+pronunciation+difference',
     category: 'Short vs Long Vowels',
     level: 'Beginner',
+    type: 'search',
   },
   {
     title: 'Arabic Diacritics (Tashkeel) — Complete Guide',
-    description: 'Covers fatha, kasra, damma, sukun, shadda, and tanwin marks.',
-    url: 'https://www.youtube.com/watch?v=PO_VXFJn0nE',
+    description: 'Covers all diacritic marks: fatha, kasra, damma, sukun, shadda, and tanwin.',
+    url: 'https://www.youtube.com/results?search_query=Arabic+tashkeel+diacritics+harakat+complete+guide',
     category: 'Short vs Long Vowels',
     level: 'Intermediate',
+    type: 'search',
   },
 
-  // Pronunciation Drills
+  // ── Pronunciation Drills ────────────────────────────────────────────
+
+  {
+    title: 'Arabic Khatawaat — Step-by-Step Pronunciation',
+    description: 'Over 280 videos with step-by-step Arabic sound, vocabulary, and phrase lessons at three difficulty levels.',
+    url: 'https://www.youtube.com/channel/UCW2AgHPThj9_8raWYE2yjfw',
+    category: 'Pronunciation Drills',
+    level: 'Beginner',
+    type: 'channel',
+  },
+  {
+    title: 'Easy Arabic — Street Interviews with Subtitles',
+    description: 'Real-world pronunciation exposure through native speaker interviews with Arabic and English subtitles. "Super Easy" sub-series for beginners.',
+    url: 'https://www.youtube.com/results?search_query=Easy+Arabic+Easy+Languages+pronunciation+beginner',
+    category: 'Pronunciation Drills',
+    level: 'Beginner',
+    type: 'search',
+  },
   {
     title: 'Arabic Pronunciation Practice — Repeat After Me',
-    description: 'Follow-along drill session covering all 28 letters with pauses for repetition.',
-    url: 'https://www.youtube.com/watch?v=kp-0n-oPvzM',
+    description: 'Follow-along drill sessions covering Arabic letters and words with pauses for repetition.',
+    url: 'https://www.youtube.com/results?search_query=Arabic+pronunciation+practice+repeat+after+me+beginner',
     category: 'Pronunciation Drills',
     level: 'Beginner',
+    type: 'search',
   },
   {
-    title: 'Arabic Reading Practice for Beginners',
-    description: 'Practice reading Arabic words and short phrases with guided pronunciation.',
-    url: 'https://www.youtube.com/watch?v=PKFjNfOBwDU',
-    category: 'Pronunciation Drills',
-    level: 'Beginner',
-  },
-  {
-    title: 'Emphatic Letters Drill — ص ض ط ظ',
-    description: 'Focused practice on the four emphatic consonants that have no English equivalent.',
-    url: 'https://www.youtube.com/watch?v=h6EpGXfNxH0',
+    title: 'Emphatic Letters Drill — Sad, Dad, Ta, Dha',
+    description: 'Focused practice on the four emphatic consonants (ص ض ط ظ) that have no English equivalent.',
+    url: 'https://www.youtube.com/results?search_query=Arabic+emphatic+letters+pronunciation+sad+dad+ta+dha+practice',
     category: 'Pronunciation Drills',
     level: 'Intermediate',
+    type: 'search',
   },
 
-  // Common Beginner Words
+  // ── Common Beginner Words ───────────────────────────────────────────
+
   {
-    title: '100 Most Common Arabic Words with Pronunciation',
-    description: 'Learn the pronunciation of the 100 most frequently used Arabic words.',
-    url: 'https://www.youtube.com/watch?v=J1gAHil89Z4',
+    title: 'Arabic with Toqa — Vocabulary & Phrases',
+    description: 'Popular MSA-focused channel with vocabulary lessons and a playlist for learning Arabic through songs.',
+    url: 'https://www.youtube.com/@ArabicwithToqa/search?query=words+vocabulary',
     category: 'Common Beginner Words',
     level: 'Beginner',
+    type: 'channel',
   },
   {
-    title: 'Arabic Greetings and Common Phrases',
-    description: 'Essential greetings and conversational phrases with correct pronunciation.',
-    url: 'https://www.youtube.com/watch?v=OoS3z2VKHMU',
+    title: 'Madinah Arabic — Beginner Conversation Course',
+    description: 'Nearly 70 videos in the beginner playlist with slow-speed explanations, Arabic writing subtitles, and romanized Arabic.',
+    url: 'https://www.youtube.com/@MadinahArabicTuition/search?query=beginner+conversation',
     category: 'Common Beginner Words',
     level: 'Beginner',
+    type: 'channel',
   },
   {
-    title: 'Numbers 1-100 in Arabic — Pronunciation Guide',
-    description: 'Learn to pronounce Arabic numbers with clear, slow audio examples.',
-    url: 'https://www.youtube.com/watch?v=T9FKcGJqoMo',
+    title: 'Most Common Arabic Words — Pronunciation Guide',
+    description: 'Learn the pronunciation of the most frequently used Arabic words for everyday conversation.',
+    url: 'https://www.youtube.com/results?search_query=most+common+Arabic+words+pronunciation+beginner+100',
     category: 'Common Beginner Words',
     level: 'Beginner',
+    type: 'search',
   },
   {
-    title: 'Arabic Colors, Days, and Months Pronunciation',
-    description: 'Everyday vocabulary categories with native-speaker pronunciation.',
-    url: 'https://www.youtube.com/watch?v=3JBqjLZ-iHQ',
+    title: 'Arabic Greetings & Essential Phrases',
+    description: 'Essential greetings and conversational phrases (As-salamu alaykum, Shukran, etc.) with correct pronunciation.',
+    url: 'https://www.youtube.com/results?search_query=Arabic+greetings+essential+phrases+pronunciation+beginner',
     category: 'Common Beginner Words',
-    level: 'Intermediate',
+    level: 'Beginner',
+    type: 'search',
   },
 ];
 
@@ -170,7 +201,7 @@ export class ResourcesView implements View {
     container.innerHTML = `
       <div class="view-header">
         <h2>Resources</h2>
-        <p>Curated YouTube lessons for Arabic pronunciation</p>
+        <p>Curated YouTube channels and lessons for Arabic pronunciation</p>
       </div>
 
       <div class="resources-controls">
@@ -216,7 +247,10 @@ export class ResourcesView implements View {
         ${filtered.length > 0 ? filtered.map(resource => `
           <a class="resource-card" href="${resource.url}" target="_blank" rel="noopener noreferrer">
             <div class="resource-card-header">
-              <span class="resource-level resource-level-${resource.level.toLowerCase()}">${resource.level}</span>
+              <div class="resource-badges">
+                <span class="resource-level resource-level-${resource.level.toLowerCase()}">${resource.level}</span>
+                <span class="resource-type resource-type-${resource.type}">${resource.type === 'channel' ? 'Channel' : 'Search'}</span>
+              </div>
               <svg class="resource-external" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
                 <polyline points="15 3 21 3 21 9"/>
