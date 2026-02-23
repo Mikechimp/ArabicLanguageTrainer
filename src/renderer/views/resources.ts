@@ -55,27 +55,27 @@ const RESOURCES: Resource[] = [
 
   {
     title: 'ArabicPod101 — Alphabet & Pronunciation Series',
-    description: '30 video lessons covering every Arabic letter with pronunciation and common mistakes to avoid.',
+    description: '30 video lessons covering every Arabic letter with pronunciation and common mistakes to avoid. 15-lesson "Alphabet Made Easy" series plus full pronunciation guide.',
     url: 'https://www.youtube.com/@ArabicPod101/search?query=alphabet%20pronunciation',
     category: 'Arabic Letter Sounds (Makharij)',
     level: 'Beginner',
     type: 'channel',
   },
   {
-    title: 'Arabic with Toqa — Learn the Arabic Alphabet',
-    description: 'Popular channel focused on MSA. Step-by-step alphabet lessons with clear pronunciation guidance.',
-    url: 'https://www.youtube.com/@ArabicwithToqa/search?query=alphabet',
+    title: 'Arabic 101 — Letters & Makharij (1M+ subscribers)',
+    description: 'Professional linguistics-trained teacher covers reading, writing, and Tajweed including makharij across 12 structured playlists.',
+    url: 'https://www.youtube.com/@Arabic101/search?query=alphabet+letters',
     category: 'Arabic Letter Sounds (Makharij)',
     level: 'Beginner',
     type: 'channel',
   },
   {
-    title: 'Arabic Alphabet — All 28 Letters Pronounced',
-    description: 'Find lessons on all 28 Arabic letter sounds with mouth position guidance.',
-    url: 'https://www.youtube.com/results?search_query=Arabic+alphabet+all+28+letters+pronunciation+beginner',
+    title: 'Learn Arabic with Maha — Alphabet Lessons',
+    description: 'Certified Arabic teacher Maha (636K+ subscribers) teaches the alphabet with pronunciation guides and cultural context.',
+    url: 'https://www.youtube.com/@LearnArabicwithMaha/search?query=alphabet+letters',
     category: 'Arabic Letter Sounds (Makharij)',
     level: 'Beginner',
-    type: 'search',
+    type: 'channel',
   },
   {
     title: 'Makharij Al-Huruf — Points of Articulation',
@@ -98,7 +98,7 @@ const RESOURCES: Resource[] = [
   },
   {
     title: 'Short vs Long Vowels in Arabic',
-    description: 'Understand the timing difference between short and long vowels with examples.',
+    description: 'Understand the timing difference between short and long vowels (alif, waw, ya) with examples.',
     url: 'https://www.youtube.com/results?search_query=Arabic+short+vs+long+vowels+pronunciation+difference',
     category: 'Short vs Long Vowels',
     level: 'Beginner',
@@ -117,11 +117,19 @@ const RESOURCES: Resource[] = [
 
   {
     title: 'Arabic Khatawaat — Step-by-Step Pronunciation',
-    description: 'Over 280 videos with step-by-step Arabic sound, vocabulary, and phrase lessons.',
-    url: 'https://www.youtube.com/@ArabicKhatawaat/search?query=pronunciation',
+    description: 'Over 280 videos with step-by-step Arabic sound, vocabulary, and phrase lessons at three difficulty levels.',
+    url: 'https://www.youtube.com/channel/UCW2AgHPThj9_8raWYE2yjfw',
     category: 'Pronunciation Drills',
     level: 'Beginner',
     type: 'channel',
+  },
+  {
+    title: 'Easy Arabic — Street Interviews with Subtitles',
+    description: 'Real-world pronunciation exposure through native speaker interviews with Arabic and English subtitles. "Super Easy" sub-series for beginners.',
+    url: 'https://www.youtube.com/results?search_query=Easy+Arabic+Easy+Languages+pronunciation+beginner',
+    category: 'Pronunciation Drills',
+    level: 'Beginner',
+    type: 'search',
   },
   {
     title: 'Arabic Pronunciation Practice — Repeat After Me',
@@ -143,16 +151,16 @@ const RESOURCES: Resource[] = [
   // ── Common Beginner Words ───────────────────────────────────────────
 
   {
-    title: 'Learn Arabic with Maha — Vocabulary & Phrases',
-    description: 'Engaging lessons by certified Arabic teacher Maha (636K+ subscribers) covering words and conversation.',
-    url: 'https://www.youtube.com/@LearnArabicwithMaha/search?query=beginner+words',
+    title: 'Arabic with Toqa — Vocabulary & Phrases',
+    description: 'Popular MSA-focused channel with vocabulary lessons and a playlist for learning Arabic through songs.',
+    url: 'https://www.youtube.com/@ArabicwithToqa/search?query=words+vocabulary',
     category: 'Common Beginner Words',
     level: 'Beginner',
     type: 'channel',
   },
   {
     title: 'Madinah Arabic — Beginner Conversation Course',
-    description: 'Nearly 70 videos in the beginner playlist with slow-speed explanations and Arabic subtitles.',
+    description: 'Nearly 70 videos in the beginner playlist with slow-speed explanations, Arabic writing subtitles, and romanized Arabic.',
     url: 'https://www.youtube.com/@MadinahArabicTuition/search?query=beginner+conversation',
     category: 'Common Beginner Words',
     level: 'Beginner',
