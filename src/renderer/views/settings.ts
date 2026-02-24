@@ -38,6 +38,7 @@ export class SettingsView implements View {
             <button class="btn btn-secondary" id="tts-test-btn">Test Arabic TTS</button>
             <button class="btn btn-secondary" id="tts-sapi-btn">Query Windows Voices</button>
             <button class="btn btn-secondary" id="tts-caps-btn">Check Language Packs</button>
+            <button class="btn btn-secondary" id="tts-reset-sapi-btn">Reset SAPI Fallback</button>
           </div>
 
           <div id="tts-test-result" style="margin-top: 12px; display: none;"></div>
@@ -129,7 +130,11 @@ export class SettingsView implements View {
     // Remove any existing classes
     dot.classList.remove('connected', 'error', 'warning');
 
-    if (diag.selectedArabicVoice) {
+    if (diag.usingSapiFallback) {
+      dot.classList.add('connected');
+      text.textContent = 'Using Windows SAPI (Fallback)';
+      text.style.color = 'var(--accent-info, var(--accent-success))';
+    } else if (diag.selectedArabicVoice) {
       dot.classList.add('connected');
       text.textContent = 'Arabic Voice Available';
       text.style.color = 'var(--accent-success)';
@@ -169,6 +174,8 @@ export class SettingsView implements View {
         <span>${fallbackName}</span>
         <span>Poll attempts:</span>
         <span>${diag.pollingAttempts}</span>
+        <span>SAPI fallback:</span>
+        <span>${diag.usingSapiFallback ? '<strong style="color: var(--accent-info, #4fc3f7);">Active</strong>' : 'Off'} (${diag.webSpeechFailures} Web Speech failures)</span>
       </div>
     `;
 
@@ -289,6 +296,12 @@ export class SettingsView implements View {
           </div>
         `;
       }
+    });
+
+    // Reset SAPI fallback button
+    container.querySelector('#tts-reset-sapi-btn')?.addEventListener('click', () => {
+      this.tts.resetSapiFallback();
+      this.loadTTSDiagnostics(container);
     });
 
     // Check language capabilities button
