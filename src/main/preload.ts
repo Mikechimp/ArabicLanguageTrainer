@@ -36,6 +36,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
     // Return cleanup function
     return () => ipcRenderer.removeListener('navigate', handler);
   },
+
+  // ── TTS / Voice Diagnostics ─────────────────────────────────
+  getSystemVoices: () => ipcRenderer.invoke('app:get-system-voices'),
+  installArabicVoices: () => ipcRenderer.invoke('app:install-arabic-voices'),
+  checkArabicCapabilities: () => ipcRenderer.invoke('app:check-arabic-capabilities'),
 });
 
 // ─── Type Declaration ────────────────────────────────────────────────
@@ -53,6 +58,9 @@ export interface ElectronAPI {
   getSystemInfo: () => Promise<{ electron: string; chrome: string; node: string; platform: string }>;
   openExternal: (url: string) => Promise<void>;
   onNavigate: (callback: (view: string) => void) => () => void;
+  getSystemVoices: () => Promise<Record<string, unknown>>;
+  installArabicVoices: () => Promise<{ success: boolean; error?: string; output?: string }>;
+  checkArabicCapabilities: () => Promise<Record<string, unknown>>;
 }
 
 declare global {

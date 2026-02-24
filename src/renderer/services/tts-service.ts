@@ -8,6 +8,8 @@
  *   - Chromium bug: speechSynthesis can silently pause after ~15s; workaround via resume() timer
  *   - No Arabic voice: onstart never fires; workaround via timeout + error fallback
  *   - Some systems have no voices at all; detected and reported as error immediately
+ *   - Windows OneCore voices may take time to register with Chromium; extended polling
+ *   - Name-based matching for known Windows Arabic voices (Naayf, Hoda, etc.)
  *
  * States:
  *   - idle: No audio playing
@@ -23,6 +25,35 @@ export type TTSStateCallback = (state: TTSState) => void;
 /** Callback fired when TTS reaches a new word boundary */
 export type TTSWordBoundaryCallback = (charIndex: number, charLength: number) => void;
 
+/** Diagnostic information about a single voice */
+export interface VoiceDiagnostic {
+  name: string;
+  lang: string;
+  localService: boolean;
+  default: boolean;
+  voiceURI: string;
+}
+
+/** Overall TTS diagnostic report */
+export interface TTSDiagnostics {
+  available: boolean;
+  voicesLoaded: boolean;
+  totalVoices: number;
+  allVoices: VoiceDiagnostic[];
+  arabicVoices: VoiceDiagnostic[];
+  selectedArabicVoice: VoiceDiagnostic | null;
+  fallbackVoice: VoiceDiagnostic | null;
+  pollingAttempts: number;
+  lastLoadTime: number | null;
+}
+
+/** Known Windows Arabic TTS voice name fragments */
+const KNOWN_ARABIC_VOICE_NAMES = [
+  'naayf',   // Microsoft Naayf - ar-SA
+  'hoda',    // Microsoft Hoda - ar-EG
+  'fadil',   // Microsoft Fadil - ar-SA (newer)
+];
+
 export class TTSService {
   private synth: SpeechSynthesis;
   private arabicVoice: SpeechSynthesisVoice | null = null;
@@ -32,6 +63,9 @@ export class TTSService {
   private startTimeout: ReturnType<typeof setTimeout> | null = null;
   private resumeInterval: ReturnType<typeof setInterval> | null = null;
   private pendingSpeak: ReturnType<typeof setTimeout> | null = null;
+  private pollingAttempts = 0;
+  private lastLoadTime: number | null = null;
+  private voiceChangedListeners: Array<() => void> = [];
 
   constructor() {
     this.synth = window.speechSynthesis;
@@ -39,19 +73,29 @@ export class TTSService {
 
     // Voices may load asynchronously in Chromium
     if (this.synth.onvoiceschanged !== undefined) {
-      this.synth.addEventListener('voiceschanged', () => this.loadVoices());
+      this.synth.addEventListener('voiceschanged', () => {
+        console.log('[TTS] voiceschanged event fired');
+        this.loadVoices();
+        this.notifyVoiceChanged();
+      });
     }
 
-    // Some Chromium builds never fire voiceschanged — poll as a fallback
+    // Some Chromium builds never fire voiceschanged — poll as a fallback.
+    // Extended to 40 attempts over 20 seconds for Windows OneCore voices
+    // that may take longer to register.
     if (!this.voicesLoaded) {
-      let attempts = 0;
       const poll = setInterval(() => {
-        attempts++;
+        this.pollingAttempts++;
         this.loadVoices();
-        if (this.voicesLoaded || attempts >= 20) {
+        if (this.voicesLoaded || this.pollingAttempts >= 40) {
           clearInterval(poll);
+          if (this.voicesLoaded) {
+            console.log(`[TTS] Voices discovered via polling after ${this.pollingAttempts} attempts`);
+          } else {
+            console.warn('[TTS] Voice polling exhausted (40 attempts / 20s) — no voices found');
+          }
         }
-      }, 250);
+      }, 500);
     }
   }
 
@@ -60,15 +104,42 @@ export class TTSService {
     if (voices.length === 0) return;
 
     this.voicesLoaded = true;
+    this.lastLoadTime = Date.now();
+
+    // Log all voices for diagnostics
+    console.log(`[TTS] Loaded ${voices.length} voice(s):`);
+    for (const v of voices) {
+      const isArabic = v.lang.startsWith('ar') || this.isKnownArabicVoice(v);
+      if (isArabic) {
+        console.log(`[TTS]   >> ARABIC: "${v.name}" lang=${v.lang} local=${v.localService} uri=${v.voiceURI}`);
+      }
+    }
 
     // Look for Arabic voices: ar-SA, ar-EG, ar-*, or any Arabic variant
     const arabicVoices = voices.filter(v => v.lang.startsWith('ar'));
 
-    if (arabicVoices.length > 0) {
+    // Also check by known voice names (catches voices with incorrect lang tags)
+    const nameMatchedVoices = voices.filter(v =>
+      !v.lang.startsWith('ar') && this.isKnownArabicVoice(v)
+    );
+
+    if (nameMatchedVoices.length > 0) {
+      console.log(`[TTS] Found ${nameMatchedVoices.length} Arabic voice(s) by name matching that weren't tagged with ar-* lang`);
+    }
+
+    const allArabicVoices = [...arabicVoices, ...nameMatchedVoices];
+
+    if (allArabicVoices.length > 0) {
+      // Priority: ar-SA > ar-EG > any ar-* > name-matched
       this.arabicVoice =
-        arabicVoices.find(v => v.lang === 'ar-SA') ||
-        arabicVoices.find(v => v.lang === 'ar-EG') ||
-        arabicVoices[0];
+        allArabicVoices.find(v => v.lang === 'ar-SA') ||
+        allArabicVoices.find(v => v.lang === 'ar-EG') ||
+        arabicVoices[0] ||
+        nameMatchedVoices[0];
+
+      console.log(`[TTS] Selected Arabic voice: "${this.arabicVoice!.name}" lang=${this.arabicVoice!.lang}`);
+    } else {
+      console.warn('[TTS] No Arabic voices found among', voices.length, 'voices');
     }
 
     // Pick a fallback voice (any voice that works) for when Arabic isn't available
@@ -78,7 +149,17 @@ export class TTSService {
         voices.find(v => v.name.includes('Google') && v.lang.startsWith('en')) ||
         voices.find(v => v.default) ||
         voices[0] || null;
+
+      if (this.fallbackVoice) {
+        console.log(`[TTS] Using fallback voice: "${this.fallbackVoice.name}" lang=${this.fallbackVoice.lang}`);
+      }
     }
+  }
+
+  /** Check if a voice matches a known Arabic TTS voice by name */
+  private isKnownArabicVoice(voice: SpeechSynthesisVoice): boolean {
+    const nameLower = voice.name.toLowerCase();
+    return KNOWN_ARABIC_VOICE_NAMES.some(known => nameLower.includes(known));
   }
 
   /** Whether TTS is available in this environment */
@@ -89,6 +170,81 @@ export class TTSService {
   /** Whether a dedicated Arabic voice was found */
   get hasArabicVoice(): boolean {
     return this.arabicVoice !== null;
+  }
+
+  /** Force a fresh reload of voices (useful after installing language packs) */
+  reloadVoices(): void {
+    console.log('[TTS] Manual voice reload requested');
+    this.arabicVoice = null;
+    this.fallbackVoice = null;
+    this.voicesLoaded = false;
+
+    // Some Chromium builds cache getVoices() — try to bust the cache
+    // by cancelling any speech and re-querying
+    this.synth.cancel();
+
+    // Attempt immediate load
+    this.loadVoices();
+
+    // If that didn't work, poll again
+    if (!this.voicesLoaded) {
+      let attempts = 0;
+      const poll = setInterval(() => {
+        attempts++;
+        this.loadVoices();
+        if (this.voicesLoaded || attempts >= 10) {
+          clearInterval(poll);
+          this.notifyVoiceChanged();
+        }
+      }, 500);
+    } else {
+      this.notifyVoiceChanged();
+    }
+  }
+
+  /** Subscribe to voice availability changes */
+  onVoiceChanged(callback: () => void): () => void {
+    this.voiceChangedListeners.push(callback);
+    return () => {
+      this.voiceChangedListeners = this.voiceChangedListeners.filter(cb => cb !== callback);
+    };
+  }
+
+  private notifyVoiceChanged(): void {
+    for (const cb of this.voiceChangedListeners) {
+      try { cb(); } catch (e) { console.error('[TTS] Voice change listener error:', e); }
+    }
+  }
+
+  /** Get detailed diagnostics about TTS state */
+  getDiagnostics(): TTSDiagnostics {
+    const voices = this.synth.getVoices();
+    const allVoices = voices.map(v => this.voiceToDiagnostic(v));
+    const arabicVoices = voices
+      .filter(v => v.lang.startsWith('ar') || this.isKnownArabicVoice(v))
+      .map(v => this.voiceToDiagnostic(v));
+
+    return {
+      available: this.isAvailable,
+      voicesLoaded: this.voicesLoaded,
+      totalVoices: voices.length,
+      allVoices,
+      arabicVoices,
+      selectedArabicVoice: this.arabicVoice ? this.voiceToDiagnostic(this.arabicVoice) : null,
+      fallbackVoice: this.fallbackVoice ? this.voiceToDiagnostic(this.fallbackVoice) : null,
+      pollingAttempts: this.pollingAttempts,
+      lastLoadTime: this.lastLoadTime,
+    };
+  }
+
+  private voiceToDiagnostic(v: SpeechSynthesisVoice): VoiceDiagnostic {
+    return {
+      name: v.name,
+      lang: v.lang,
+      localService: v.localService,
+      default: v.default,
+      voiceURI: v.voiceURI,
+    };
   }
 
   private clearTimers(): void {

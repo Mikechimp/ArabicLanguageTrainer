@@ -13,6 +13,7 @@
  */
 
 import { app, BrowserWindow, Menu, ipcMain, dialog, shell } from 'electron';
+import { execFile } from 'child_process';
 import { BackendManager } from './backend-manager';
 
 // Webpack magic variables injected by Electron Forge
@@ -175,6 +176,165 @@ function registerIpcHandlers(): void {
   // Open external links
   ipcMain.handle('app:open-external', async (_event, url: string) => {
     await shell.openExternal(url);
+  });
+
+  // Query Windows SAPI voices directly via PowerShell (bypasses Chromium)
+  ipcMain.handle('app:get-system-voices', async () => {
+    if (process.platform !== 'win32') {
+      return { platform: process.platform, voices: [], error: 'Not Windows — SAPI query not applicable' };
+    }
+
+    return new Promise((resolve) => {
+      const psScript = `
+        Add-Type -AssemblyName System.Speech;
+        $synth = New-Object System.Speech.Synthesis.SpeechSynthesizer;
+        $voices = $synth.GetInstalledVoices() | Where-Object { $_.Enabled } | ForEach-Object {
+          $info = $_.VoiceInfo;
+          [PSCustomObject]@{
+            Name = $info.Name;
+            Culture = $info.Culture.Name;
+            Gender = $info.Gender.ToString();
+            Age = $info.Age.ToString();
+            Description = $info.Description;
+          }
+        };
+        $voices | ConvertTo-Json -Compress
+      `;
+
+      execFile('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', psScript], {
+        timeout: 10000,
+      }, (error: Error | null, stdout: string, stderr: string) => {
+        if (error) {
+          console.error('[Main] SAPI voice query failed:', error.message);
+          // Try OneCore voices as fallback (newer Windows 10+ voices)
+          const oneCoreScript = `
+            $voices = @();
+            try {
+              $synth = New-Object -ComObject SAPI.SpVoice;
+              $tokens = $synth.GetVoices();
+              for ($i = 0; $i -lt $tokens.Count; $i++) {
+                $token = $tokens.Item($i);
+                $voices += [PSCustomObject]@{
+                  Name = $token.GetDescription();
+                  Id = $token.Id;
+                };
+              };
+            } catch { };
+            $regVoices = @();
+            try {
+              $regPath = 'HKLM:\\SOFTWARE\\Microsoft\\Speech_OneCore\\Voices\\Tokens';
+              if (Test-Path $regPath) {
+                Get-ChildItem $regPath | ForEach-Object {
+                  $regVoices += [PSCustomObject]@{
+                    Name = (Get-ItemProperty $_.PSPath).'(default)';
+                    Lang = (Get-ItemProperty "$($_.PSPath)\\Attributes").Language;
+                    Path = $_.PSPath;
+                  }
+                }
+              }
+            } catch { };
+            [PSCustomObject]@{
+              SAPIVoices = $voices;
+              OneCoreVoices = $regVoices;
+            } | ConvertTo-Json -Depth 3 -Compress
+          `;
+
+          execFile('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', oneCoreScript], {
+            timeout: 10000,
+          }, (error2: Error | null, stdout2: string, _stderr2: string) => {
+            if (error2) {
+              resolve({ platform: 'win32', voices: [], error: `Both queries failed: ${error.message}` });
+              return;
+            }
+            try {
+              const data = JSON.parse(stdout2.trim());
+              resolve({ platform: 'win32', sapiVoices: data.SAPIVoices || [], oneCoreVoices: data.OneCoreVoices || [], source: 'onecore-fallback' });
+            } catch {
+              resolve({ platform: 'win32', voices: [], error: 'Failed to parse OneCore voice data', raw: stdout2.trim() });
+            }
+          });
+          return;
+        }
+
+        try {
+          let voices = JSON.parse(stdout.trim());
+          // PowerShell returns a single object (not array) if only 1 voice
+          if (!Array.isArray(voices)) voices = [voices];
+          resolve({ platform: 'win32', voices, source: 'sapi' });
+        } catch {
+          resolve({ platform: 'win32', voices: [], error: 'Failed to parse SAPI voice data', raw: stdout.trim() });
+        }
+      });
+    });
+  });
+
+  // Install Arabic language features via PowerShell (elevated)
+  ipcMain.handle('app:install-arabic-voices', async () => {
+    if (process.platform !== 'win32') {
+      return { success: false, error: 'Not Windows' };
+    }
+
+    const capabilities = [
+      'Language.Basic~~~ar-SA~0.0.1.0',
+      'Language.TextToSpeech~~~ar-SA~0.0.1.0',
+    ];
+
+    const script = capabilities
+      .map(cap => `Add-WindowsCapability -Online -Name "${cap}" -ErrorAction SilentlyContinue`)
+      .join('; ');
+
+    return new Promise((resolve) => {
+      // This requires elevated privileges — use Start-Process to request UAC
+      const elevatedScript = `
+        Start-Process powershell -Verb RunAs -ArgumentList '-NoProfile -Command ${script.replace(/'/g, "''")}' -Wait
+      `;
+
+      execFile('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', elevatedScript], {
+        timeout: 120000, // Language pack install can take a while
+      }, (error: Error | null, stdout: string, _stderr: string) => {
+        if (error) {
+          console.error('[Main] Arabic voice install failed:', error.message);
+          resolve({ success: false, error: error.message });
+          return;
+        }
+        resolve({ success: true, output: stdout.trim() });
+      });
+    });
+  });
+
+  // Check which Arabic language capabilities are installed
+  ipcMain.handle('app:check-arabic-capabilities', async () => {
+    if (process.platform !== 'win32') {
+      return { platform: process.platform, capabilities: [], error: 'Not Windows' };
+    }
+
+    return new Promise((resolve) => {
+      const script = `
+        $caps = Get-WindowsCapability -Online | Where-Object { $_.Name -like '*ar-SA*' -or $_.Name -like '*Arabic*' } | ForEach-Object {
+          [PSCustomObject]@{
+            Name = $_.Name;
+            State = $_.State.ToString();
+          }
+        };
+        $caps | ConvertTo-Json -Compress
+      `;
+
+      execFile('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', script], {
+        timeout: 30000,
+      }, (error: Error | null, stdout: string, _stderr: string) => {
+        if (error) {
+          resolve({ platform: 'win32', capabilities: [], error: error.message });
+          return;
+        }
+        try {
+          let caps = JSON.parse(stdout.trim());
+          if (!Array.isArray(caps)) caps = [caps];
+          resolve({ platform: 'win32', capabilities: caps });
+        } catch {
+          resolve({ platform: 'win32', capabilities: [], error: 'Parse failed', raw: stdout.trim() });
+        }
+      });
+    });
   });
 }
 
