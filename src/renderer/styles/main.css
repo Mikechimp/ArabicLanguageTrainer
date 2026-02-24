@@ -768,8 +768,8 @@ body {
 /* ─── Alphabet View ─────────────────────────────────────────────────── */
 .alphabet-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 12px;
   margin-bottom: 32px;
 }
 
@@ -777,8 +777,8 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 16px 8px;
+  gap: 8px;
+  padding: 20px 12px;
   background: var(--bg-card);
   border: 2px solid var(--border-color);
   border-radius: var(--radius-md);
@@ -801,14 +801,14 @@ body {
 
 .alphabet-char {
   font-family: var(--font-arabic);
-  font-size: 2rem;
+  font-size: 3rem;
   color: var(--text-primary);
   direction: rtl;
   line-height: 1;
 }
 
 .alphabet-name {
-  font-size: 0.65rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -819,58 +819,57 @@ body {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  padding: 32px;
+  padding: 40px;
   margin-bottom: 32px;
 }
 
 .letter-detail-header {
   display: flex;
   align-items: center;
-  gap: 24px;
-  margin-bottom: 32px;
-  padding-bottom: 24px;
+  gap: 32px;
+  margin-bottom: 36px;
+  padding-bottom: 28px;
   border-bottom: 1px solid var(--border-color);
 }
 
 .letter-detail-char {
   font-family: var(--font-arabic);
-  font-size: 5rem;
+  font-size: 6rem;
   color: var(--accent-primary);
   direction: rtl;
   line-height: 1;
-  min-width: 100px;
+  min-width: 120px;
   text-align: center;
 }
 
 .letter-detail-info h3 {
-  font-size: 1.4rem;
-  margin-bottom: 4px;
+  font-size: 1.6rem;
+  margin-bottom: 6px;
 }
 
 .letter-sound {
   color: var(--text-secondary);
-  font-size: 0.95rem;
+  font-size: 1.05rem;
 }
 
 .letter-forms-section,
 .letter-stroke-section,
 .letter-examples-section {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .letter-forms-section h4,
 .letter-stroke-section h4,
 .letter-examples-section h4 {
-  font-size: 1rem;
   color: var(--accent-info);
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 
 .letter-forms-hint {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   color: var(--text-muted);
   margin-bottom: 16px;
 }
@@ -878,15 +877,15 @@ body {
 .letter-forms {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  gap: 16px;
 }
 
 .letter-form {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 20px 12px;
+  gap: 10px;
+  padding: 28px 16px;
   background: var(--bg-secondary);
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-color);
@@ -894,33 +893,33 @@ body {
 
 .form-char {
   font-family: var(--font-arabic);
-  font-size: 2.5rem;
+  font-size: 3.2rem;
   color: var(--text-primary);
   direction: rtl;
   line-height: 1;
 }
 
 .form-label {
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .stroke-hint {
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   color: var(--text-primary);
   margin-bottom: 8px;
 }
 
 .stroke-direction {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   color: var(--text-muted);
 }
 
 .letter-examples {
   display: flex;
-  gap: 16px;
+  gap: 20px;
   flex-wrap: wrap;
 }
 
@@ -928,29 +927,29 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 16px 24px;
+  gap: 6px;
+  padding: 20px 28px;
   background: var(--bg-secondary);
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-color);
-  min-width: 120px;
+  min-width: 140px;
 }
 
 .example-arabic {
   font-family: var(--font-arabic);
-  font-size: 1.8rem;
+  font-size: 2.2rem;
   color: var(--accent-primary);
   direction: rtl;
 }
 
 .example-translit {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   color: var(--accent-info);
   font-style: italic;
 }
 
 .example-english {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: var(--text-secondary);
 }
 
@@ -1543,16 +1542,21 @@ body {
 
   /* Alphabet responsive */
   .alphabet-grid {
-    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-    gap: 6px;
+    grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
+    gap: 8px;
   }
 
   .alphabet-letter {
-    padding: 10px 6px;
+    padding: 14px 8px;
+    gap: 6px;
   }
 
   .alphabet-char {
-    font-size: 1.6rem;
+    font-size: 2.2rem;
+  }
+
+  .alphabet-name {
+    font-size: 0.7rem;
   }
 
   .letter-forms {
@@ -1560,12 +1564,16 @@ body {
   }
 
   .letter-detail {
-    padding: 20px;
+    padding: 24px;
   }
 
   .letter-detail-char {
-    font-size: 3.5rem;
-    min-width: 70px;
+    font-size: 4rem;
+    min-width: 80px;
+  }
+
+  .form-char {
+    font-size: 2.4rem;
   }
 
   /* Reading responsive */

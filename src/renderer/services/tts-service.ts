@@ -28,6 +28,7 @@ export class TTSService {
   private currentUtterance: SpeechSynthesisUtterance | null = null;
   private startTimeout: ReturnType<typeof setTimeout> | null = null;
   private resumeInterval: ReturnType<typeof setInterval> | null = null;
+  private pendingSpeak: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     this.synth = window.speechSynthesis;
@@ -36,6 +37,18 @@ export class TTSService {
     // Voices may load asynchronously in Chromium
     if (this.synth.onvoiceschanged !== undefined) {
       this.synth.addEventListener('voiceschanged', () => this.loadVoices());
+    }
+
+    // Some Chromium builds never fire voiceschanged — poll as a fallback
+    if (!this.voicesLoaded) {
+      let attempts = 0;
+      const poll = setInterval(() => {
+        attempts++;
+        this.loadVoices();
+        if (this.voicesLoaded || attempts >= 20) {
+          clearInterval(poll);
+        }
+      }, 250);
     }
   }
 
@@ -83,6 +96,10 @@ export class TTSService {
     if (this.resumeInterval) {
       clearInterval(this.resumeInterval);
       this.resumeInterval = null;
+    }
+    if (this.pendingSpeak) {
+      clearTimeout(this.pendingSpeak);
+      this.pendingSpeak = null;
     }
   }
 
@@ -167,17 +184,46 @@ export class TTSService {
     };
 
     this.currentUtterance = utterance;
-    this.synth.speak(utterance);
 
-    // Safety timeout: if onstart doesn't fire within 3 seconds, the TTS is stuck.
+    // Chromium bug workaround: calling speak() immediately after cancel() can
+    // silently drop the utterance. Delay the speak() call to let Chromium's
+    // internal state settle, then call resume() to ensure playback starts.
+    this.pendingSpeak = setTimeout(() => {
+      this.pendingSpeak = null;
+      // Chromium sometimes gets stuck in a paused state; resume before speaking
+      this.synth.resume();
+      this.synth.speak(utterance);
+      // Another Chromium workaround: nudge the synth to start processing
+      setTimeout(() => {
+        if (this.synth.paused) {
+          this.synth.resume();
+        }
+      }, 100);
+    }, 50);
+
+    // Safety timeout: if onstart doesn't fire within 5 seconds, the TTS is stuck.
     // This happens when no suitable voice exists for the language.
     this.startTimeout = setTimeout(() => {
       if (this.currentUtterance === utterance) {
         console.warn('[TTS] Speech start timeout — no suitable voice may be available');
-        this.stop();
-        onStateChange?.('error');
+        // Try one more time with a fresh approach before giving up
+        this.synth.cancel();
+        setTimeout(() => {
+          if (this.currentUtterance === utterance) {
+            this.synth.speak(utterance);
+            this.synth.resume();
+            // Final timeout — if still not started, report error
+            this.startTimeout = setTimeout(() => {
+              if (this.currentUtterance === utterance) {
+                console.warn('[TTS] Speech retry also failed');
+                this.stop();
+                onStateChange?.('error');
+              }
+            }, 3000);
+          }
+        }, 100);
       }
-    }, 3000);
+    }, 5000);
   }
 }
 
