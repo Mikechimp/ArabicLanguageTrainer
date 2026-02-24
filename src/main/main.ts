@@ -302,6 +302,80 @@ function registerIpcHandlers(): void {
     });
   });
 
+  // Speak Arabic text via Windows SAPI (bypasses Chromium Web Speech API)
+  ipcMain.handle('app:speak-sapi', async (_event, text: string, voiceName?: string) => {
+    if (process.platform !== 'win32') {
+      return { success: false, error: 'Not Windows' };
+    }
+
+    if (!text || text.trim().length === 0) {
+      return { success: false, error: 'No text provided' };
+    }
+
+    return new Promise((resolve) => {
+      // Sanitize text: escape single quotes and remove any control chars
+      const safeText = text.replace(/'/g, "''").replace(/[\x00-\x1f]/g, '');
+
+      // Build PowerShell script to speak via System.Speech
+      // Try SAPI first, fall back to OneCore COM object
+      const psScript = `
+        Add-Type -AssemblyName System.Speech;
+        $synth = New-Object System.Speech.Synthesis.SpeechSynthesizer;
+        $found = $false;
+        ${voiceName ? `
+        try {
+          $synth.SelectVoice('${voiceName.replace(/'/g, "''")}');
+          $found = $true;
+        } catch { }
+        ` : ''}
+        if (-not $found) {
+          $voices = $synth.GetInstalledVoices() | Where-Object { $_.Enabled };
+          $arabicVoice = $voices | Where-Object { $_.VoiceInfo.Culture.Name.StartsWith('ar') } | Select-Object -First 1;
+          if ($arabicVoice) {
+            try { $synth.SelectVoice($arabicVoice.VoiceInfo.Name); } catch { }
+          }
+        }
+        $synth.Rate = -2;
+        $synth.Speak('${safeText}');
+        Write-Output 'OK';
+      `;
+
+      execFile('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', psScript], {
+        timeout: 15000,
+      }, (error: Error | null, stdout: string, _stderr: string) => {
+        if (error) {
+          console.error('[Main] SAPI speak failed:', error.message);
+          // Try OneCore COM as final fallback
+          const comScript = `
+            $voice = New-Object -ComObject SAPI.SpVoice;
+            $tokens = $voice.GetVoices();
+            for ($i = 0; $i -lt $tokens.Count; $i++) {
+              $desc = $tokens.Item($i).GetDescription();
+              if ($desc -like '*Arabic*' -or $desc -like '*Naayf*' -or $desc -like '*Hoda*') {
+                $voice.Voice = $tokens.Item($i);
+                break;
+              }
+            }
+            $voice.Rate = -2;
+            $voice.Speak('${safeText}');
+            Write-Output 'OK';
+          `;
+          execFile('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', comScript], {
+            timeout: 15000,
+          }, (error2: Error | null, stdout2: string) => {
+            if (error2) {
+              resolve({ success: false, error: `Both SAPI methods failed: ${error2.message}` });
+            } else {
+              resolve({ success: true, method: 'sapi-com' });
+            }
+          });
+          return;
+        }
+        resolve({ success: true, method: 'system-speech' });
+      });
+    });
+  });
+
   // Check which Arabic language capabilities are installed
   ipcMain.handle('app:check-arabic-capabilities', async () => {
     if (process.platform !== 'win32') {

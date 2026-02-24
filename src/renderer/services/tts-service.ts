@@ -45,6 +45,8 @@ export interface TTSDiagnostics {
   fallbackVoice: VoiceDiagnostic | null;
   pollingAttempts: number;
   lastLoadTime: number | null;
+  usingSapiFallback: boolean;
+  webSpeechFailures: number;
 }
 
 /** Known Windows Arabic TTS voice name fragments */
@@ -66,6 +68,10 @@ export class TTSService {
   private pollingAttempts = 0;
   private lastLoadTime: number | null = null;
   private voiceChangedListeners: Array<() => void> = [];
+  /** Whether SAPI fallback is being used because Web Speech API failed */
+  private useSapiFallback = false;
+  /** Track consecutive Web Speech API failures to auto-switch to SAPI */
+  private webSpeechFailures = 0;
 
   constructor() {
     this.synth = window.speechSynthesis;
@@ -216,6 +222,18 @@ export class TTSService {
     }
   }
 
+  /** Whether TTS is using SAPI fallback instead of Web Speech API */
+  get isSapiFallback(): boolean {
+    return this.useSapiFallback;
+  }
+
+  /** Reset SAPI fallback state to try Web Speech API again */
+  resetSapiFallback(): void {
+    this.useSapiFallback = false;
+    this.webSpeechFailures = 0;
+    console.log('[TTS] SAPI fallback reset — will try Web Speech API again');
+  }
+
   /** Get detailed diagnostics about TTS state */
   getDiagnostics(): TTSDiagnostics {
     const voices = this.synth.getVoices();
@@ -234,6 +252,8 @@ export class TTSService {
       fallbackVoice: this.fallbackVoice ? this.voiceToDiagnostic(this.fallbackVoice) : null,
       pollingAttempts: this.pollingAttempts,
       lastLoadTime: this.lastLoadTime,
+      usingSapiFallback: this.useSapiFallback,
+      webSpeechFailures: this.webSpeechFailures,
     };
   }
 
@@ -273,11 +293,15 @@ export class TTSService {
 
   /**
    * Speak the given Arabic text.
+   *
+   * Uses Web Speech API first. If it fails (common on Windows), automatically
+   * falls back to Windows SAPI via the main process IPC bridge.
+   *
    * @param text Arabic text to pronounce
    * @param onStateChange Callback for state changes (loading, playing, idle, error)
    */
   speak(text: string, onStateChange?: TTSStateCallback): void {
-    if (!this.isAvailable) {
+    if (!this.isAvailable && !this.hasSapiAccess()) {
       onStateChange?.('error');
       return;
     }
@@ -285,6 +309,12 @@ export class TTSService {
     // Stop any current playback
     this.stop();
     onStateChange?.('loading');
+
+    // If SAPI fallback is active (previous Web Speech failures), go straight to SAPI
+    if (this.useSapiFallback) {
+      this.speakViaSapi(text, onStateChange);
+      return;
+    }
 
     // Ensure voices are loaded
     if (!this.voicesLoaded) {
@@ -296,15 +326,26 @@ export class TTSService {
 
     const voice = this.arabicVoice || this.fallbackVoice;
 
+    // If no voices at all and we have SAPI access, go straight to SAPI
+    if (!voice && this.hasSapiAccess()) {
+      console.log('[TTS] No Web Speech voices available, trying SAPI fallback');
+      this.speakViaSapi(text, onStateChange);
+      return;
+    }
+
+    // If no voices and no SAPI, fail immediately
+    if (!voice) {
+      console.warn('[TTS] No voices available and no SAPI fallback');
+      onStateChange?.('error');
+      return;
+    }
+
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'ar-SA';
     utterance.rate = 0.85;
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
-
-    if (voice) {
-      utterance.voice = voice;
-    }
+    utterance.voice = voice;
 
     utterance.onstart = () => {
       // Clear the "stuck" timeout since speech started
@@ -312,6 +353,8 @@ export class TTSService {
         clearTimeout(this.startTimeout);
         this.startTimeout = null;
       }
+      // Reset failure counter on success
+      this.webSpeechFailures = 0;
       onStateChange?.('playing');
 
       // Chromium bug workaround: speechSynthesis can silently pause after ~15s.
@@ -338,15 +381,25 @@ export class TTSService {
         onStateChange?.('idle');
       } else {
         console.error('[TTS] Speech error:', event.error);
-        onStateChange?.('error');
+        // Try SAPI fallback on error
+        if (this.hasSapiAccess()) {
+          console.log('[TTS] Web Speech error, trying SAPI fallback');
+          this.webSpeechFailures++;
+          if (this.webSpeechFailures >= 2) {
+            this.useSapiFallback = true;
+            console.log('[TTS] Switching to SAPI fallback permanently (2+ consecutive failures)');
+          }
+          this.speakViaSapi(text, onStateChange);
+        } else {
+          onStateChange?.('error');
+        }
       }
     };
 
     this.currentUtterance = utterance;
 
     // Chromium bug workaround: calling speak() immediately after cancel() can
-    // silently drop the utterance. Delay the speak() call to let Chromium's
-    // internal state settle, then call resume() to ensure playback starts.
+    // silently drop the utterance. Delay slightly to let state settle.
     this.pendingSpeak = setTimeout(() => {
       this.pendingSpeak = null;
       // Chromium sometimes gets stuck in a paused state; resume before speaking
@@ -358,31 +411,68 @@ export class TTSService {
           this.synth.resume();
         }
       }, 100);
-    }, 50);
+    }, 150);
 
-    // Safety timeout: if onstart doesn't fire within 5 seconds, the TTS is stuck.
-    // This happens when no suitable voice exists for the language.
+    // Safety timeout: if onstart doesn't fire within 2 seconds, try SAPI fallback.
+    // Reduced from 5s for faster user feedback.
     this.startTimeout = setTimeout(() => {
       if (this.currentUtterance === utterance) {
-        console.warn('[TTS] Speech start timeout — no suitable voice may be available');
-        // Try one more time with a fresh approach before giving up
-        this.synth.cancel();
-        setTimeout(() => {
-          if (this.currentUtterance === utterance) {
+        console.warn('[TTS] Speech start timeout (2s) — trying SAPI fallback');
+        this.stop();
+        this.webSpeechFailures++;
+        if (this.webSpeechFailures >= 2) {
+          this.useSapiFallback = true;
+          console.log('[TTS] Switching to SAPI fallback permanently (2+ consecutive failures)');
+        }
+        if (this.hasSapiAccess()) {
+          this.speakViaSapi(text, onStateChange);
+        } else {
+          // No SAPI — try one more time with Web Speech before giving up
+          this.synth.cancel();
+          setTimeout(() => {
             this.synth.speak(utterance);
             this.synth.resume();
-            // Final timeout — if still not started, report error
+            this.currentUtterance = utterance;
             this.startTimeout = setTimeout(() => {
               if (this.currentUtterance === utterance) {
-                console.warn('[TTS] Speech retry also failed');
+                console.warn('[TTS] Speech retry also failed, no SAPI available');
                 this.stop();
                 onStateChange?.('error');
               }
-            }, 3000);
-          }
-        }, 100);
+            }, 2000);
+          }, 100);
+        }
       }
-    }, 5000);
+    }, 2000);
+  }
+
+  /** Check if we can access Windows SAPI via the Electron IPC bridge */
+  private hasSapiAccess(): boolean {
+    return typeof window !== 'undefined' &&
+           typeof window.electronAPI !== 'undefined' &&
+           typeof window.electronAPI.speakSapi === 'function';
+  }
+
+  /**
+   * Speak via Windows SAPI through the main process.
+   * This bypasses Chromium's Web Speech API entirely.
+   */
+  private speakViaSapi(text: string, onStateChange?: TTSStateCallback): void {
+    console.log('[TTS] Speaking via SAPI fallback:', text.substring(0, 40) + (text.length > 40 ? '...' : ''));
+    onStateChange?.('playing');
+
+    window.electronAPI.speakSapi(text).then((result) => {
+      if (result.success) {
+        console.log(`[TTS] SAPI spoke successfully via ${result.method}`);
+        onStateChange?.('idle');
+      } else {
+        console.error('[TTS] SAPI fallback failed:', result.error);
+        onStateChange?.('error');
+      }
+    }).catch((err) => {
+      console.error('[TTS] SAPI IPC error:', err);
+      onStateChange?.('error');
+    });
   }
 
   /**
@@ -401,7 +491,7 @@ export class TTSService {
     onWordBoundary: TTSWordBoundaryCallback,
     onStateChange?: TTSStateCallback,
   ): void {
-    if (!this.isAvailable) {
+    if (!this.isAvailable && !this.hasSapiAccess()) {
       onStateChange?.('error');
       return;
     }
@@ -417,22 +507,8 @@ export class TTSService {
     }
 
     const voice = this.arabicVoice || this.fallbackVoice;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'ar-SA';
-    utterance.rate = Math.max(0.1, Math.min(rate, 1.0));
-    utterance.pitch = 1.0;
-    utterance.volume = 1.0;
 
-    if (voice) {
-      utterance.voice = voice;
-    }
-
-    // Track whether real boundary events fire so we can fall back to estimation
-    let boundaryFired = false;
-    let fallbackTimer: ReturnType<typeof setTimeout> | null = null;
-    let fallbackTimers: ReturnType<typeof setTimeout>[] = [];
-
-    // Build word offset map for fallback timing
+    // Build word offset map (needed for both Web Speech and SAPI fallback)
     const words = text.split(/\s+/);
     const wordOffsets: { start: number; length: number }[] = [];
     let cursor = 0;
@@ -441,6 +517,31 @@ export class TTSService {
       wordOffsets.push({ start: idx, length: w.length });
       cursor = idx + w.length;
     }
+
+    // If SAPI fallback is active or no voices available, use SAPI with estimated timing
+    if (this.useSapiFallback || (!voice && this.hasSapiAccess())) {
+      console.log('[TTS] Using SAPI fallback for tracked speech');
+      this.speakViaSapiWithTracking(text, rate, wordOffsets, onWordBoundary, onStateChange);
+      return;
+    }
+
+    if (!voice) {
+      console.warn('[TTS] No voices available for tracked speech');
+      onStateChange?.('error');
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'ar-SA';
+    utterance.rate = Math.max(0.1, Math.min(rate, 1.0));
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+    utterance.voice = voice;
+
+    // Track whether real boundary events fire so we can fall back to estimation
+    let boundaryFired = false;
+    let fallbackTimer: ReturnType<typeof setTimeout> | null = null;
+    let fallbackTimers: ReturnType<typeof setTimeout>[] = [];
 
     // Real boundary events from the speech engine
     utterance.onboundary = (event: SpeechSynthesisEvent) => {
@@ -458,6 +559,7 @@ export class TTSService {
         clearTimeout(this.startTimeout);
         this.startTimeout = null;
       }
+      this.webSpeechFailures = 0;
       onStateChange?.('playing');
 
       // Fire the first word boundary immediately
@@ -477,7 +579,6 @@ export class TTSService {
         const estimatedDurationMs = (totalChars / charsPerSecond) * 1000;
         const msPerChar = estimatedDurationMs / totalChars;
 
-        let elapsed = 0;
         for (let i = 1; i < wordOffsets.length; i++) {
           // Time to reach this word = cumulative char lengths of prior words
           const prevChars = wordOffsets.slice(0, i).reduce((sum, w) => sum + w.length, 0);
@@ -520,7 +621,14 @@ export class TTSService {
         onStateChange?.('idle');
       } else {
         console.error('[TTS] Speech error:', event.error);
-        onStateChange?.('error');
+        // Try SAPI fallback for tracked speech too
+        if (this.hasSapiAccess()) {
+          this.webSpeechFailures++;
+          if (this.webSpeechFailures >= 2) this.useSapiFallback = true;
+          this.speakViaSapiWithTracking(text, rate, wordOffsets, onWordBoundary, onStateChange);
+        } else {
+          onStateChange?.('error');
+        }
       }
     };
 
@@ -535,26 +643,84 @@ export class TTSService {
           this.synth.resume();
         }
       }, 100);
-    }, 50);
+    }, 150);
 
+    // Reduced timeout: 2s instead of 5s for faster feedback
     this.startTimeout = setTimeout(() => {
       if (this.currentUtterance === utterance) {
-        console.warn('[TTS] Tracked speech start timeout');
-        this.synth.cancel();
-        setTimeout(() => {
-          if (this.currentUtterance === utterance) {
+        console.warn('[TTS] Tracked speech start timeout (2s)');
+        this.stop();
+        this.webSpeechFailures++;
+        if (this.webSpeechFailures >= 2) this.useSapiFallback = true;
+        if (this.hasSapiAccess()) {
+          this.speakViaSapiWithTracking(text, rate, wordOffsets, onWordBoundary, onStateChange);
+        } else {
+          // Fallback: retry Web Speech once more
+          if (fallbackTimer) clearTimeout(fallbackTimer);
+          for (const t of fallbackTimers) clearTimeout(t);
+          fallbackTimers = [];
+          this.synth.cancel();
+          setTimeout(() => {
             this.synth.speak(utterance);
             this.synth.resume();
+            this.currentUtterance = utterance;
             this.startTimeout = setTimeout(() => {
               if (this.currentUtterance === utterance) {
                 this.stop();
                 onStateChange?.('error');
               }
-            }, 3000);
-          }
-        }, 100);
+            }, 2000);
+          }, 100);
+        }
       }
-    }, 5000);
+    }, 2000);
+  }
+
+  /**
+   * SAPI fallback for tracked speech. Uses estimated word timing since
+   * SAPI speaks synchronously in the main process.
+   */
+  private speakViaSapiWithTracking(
+    text: string,
+    rate: number,
+    wordOffsets: { start: number; length: number }[],
+    onWordBoundary: TTSWordBoundaryCallback,
+    onStateChange?: TTSStateCallback,
+  ): void {
+    onStateChange?.('playing');
+
+    // Fire first word immediately
+    if (wordOffsets.length > 0) {
+      onWordBoundary(wordOffsets[0].start, wordOffsets[0].length);
+    }
+
+    // Estimate word timings and schedule boundary callbacks
+    const charsPerSecond = 5 * Math.max(0.1, Math.min(rate, 1.0));
+    const totalChars = text.replace(/\s+/g, '').length;
+    const estimatedDurationMs = (totalChars / charsPerSecond) * 1000;
+    const msPerChar = totalChars > 0 ? estimatedDurationMs / totalChars : 200;
+
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    for (let i = 1; i < wordOffsets.length; i++) {
+      const prevChars = wordOffsets.slice(0, i).reduce((sum, w) => sum + w.length, 0);
+      const delay = prevChars * msPerChar;
+      const wo = wordOffsets[i];
+      timers.push(setTimeout(() => onWordBoundary(wo.start, wo.length), delay));
+    }
+
+    window.electronAPI.speakSapi(text).then((result) => {
+      for (const t of timers) clearTimeout(t);
+      if (result.success) {
+        onStateChange?.('idle');
+      } else {
+        console.error('[TTS] SAPI tracked fallback failed:', result.error);
+        onStateChange?.('error');
+      }
+    }).catch((err) => {
+      for (const t of timers) clearTimeout(t);
+      console.error('[TTS] SAPI IPC error:', err);
+      onStateChange?.('error');
+    });
   }
 }
 
